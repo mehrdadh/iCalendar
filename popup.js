@@ -6,6 +6,8 @@ const errorMessage = document.getElementById('errorMessage');
 const createEventBtn = document.getElementById('createEventBtn');
 const successMessage = document.getElementById('successMessage');
 const eventTitle = document.getElementById('eventTitle');
+const calendarSelector = document.getElementById('calendarSelector');
+const calendarDropdown = document.getElementById('calendarDropdown');
 
 // Store parsed ICS data globally
 let currentICSData = null;
@@ -30,9 +32,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Restore event data when popup opens
+// Check authorization status and restore event data when popup opens
 document.addEventListener('DOMContentLoaded', async () => {
   try {
+    // First, check if user is authorized
+    const isAuthorized = await checkAndRequestAuthorization();
+    
+    // If authorized, load calendars
+    if (isAuthorized) {
+      await loadCalendars();
+    }
+    
+    // Then restore event data if available
     const stored = await chrome.storage.local.get(['eventData', 'fileName']);
     if (stored.eventData && stored.fileName) {
       currentICSData = stored.eventData;
@@ -40,9 +51,157 @@ document.addEventListener('DOMContentLoaded', async () => {
       displayICSAttributes(stored.fileName, stored.eventData);
     }
   } catch (error) {
-    console.error('Error restoring event data:', error);
+    console.error('Error in DOMContentLoaded:', error);
   }
 });
+
+// Check if user is authorized, if not request authorization
+async function checkAndRequestAuthorization() {
+  try {
+    // Check if we already have authorization
+    const stored = await chrome.storage.local.get(['isAuthorized', 'hasPromptedAuth']);
+    
+    // If already authorized, nothing to do
+    if (stored.isAuthorized) {
+      console.log('User is already authorized');
+      return true;
+    }
+    
+    // If we haven't prompted for auth yet, or if authorization was lost, prompt now
+    if (!stored.hasPromptedAuth) {
+      console.log('First time setup - requesting authorization');
+      await promptForAuthorization();
+    }
+    
+    return stored.isAuthorized || false;
+  } catch (error) {
+    console.error('Error checking authorization:', error);
+    return false;
+  }
+}
+
+// Prompt user for authorization
+async function promptForAuthorization() {
+  try {
+    // Show a friendly message
+    showInfo('Welcome! Let\'s connect to your Google Calendar...');
+    
+    // Request authorization by attempting to get a token
+    const response = await new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'requestAuthorization',
+          clientId: GOOGLE_CLIENT_ID
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('Authorization error:', chrome.runtime.lastError);
+            resolve({ success: false, error: chrome.runtime.lastError.message });
+            return;
+          }
+          resolve(response);
+        }
+      );
+    });
+    
+    if (response && response.success) {
+      // Mark as authorized
+      await chrome.storage.local.set({
+        isAuthorized: true,
+        hasPromptedAuth: true
+      });
+      showSuccess('Successfully connected to Google Calendar! ✓');
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        successMessage.classList.add('hidden');
+      }, 3000);
+    } else {
+      // Mark that we attempted to prompt
+      await chrome.storage.local.set({
+        hasPromptedAuth: true,
+        isAuthorized: false
+      });
+      showError('Authorization was not completed. You can try again later.');
+    }
+  } catch (error) {
+    console.error('Error prompting for authorization:', error);
+    await chrome.storage.local.set({
+      hasPromptedAuth: true,
+      isAuthorized: false
+    });
+  }
+}
+
+// Show info message
+function showInfo(message) {
+  // Reuse success message for info (you could create a separate info div if needed)
+  successMessage.textContent = message;
+  successMessage.classList.remove('hidden');
+  successMessage.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+}
+
+// Load user's calendars
+async function loadCalendars() {
+  try {
+    console.log('Loading calendars...');
+    
+    const response = await new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'getCalendars',
+          clientId: GOOGLE_CLIENT_ID
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('Error loading calendars:', chrome.runtime.lastError);
+            resolve({ success: false, error: chrome.runtime.lastError.message });
+            return;
+          }
+          resolve(response);
+        }
+      );
+    });
+    
+    if (response && response.success && response.calendars) {
+      console.log('Calendars loaded:', response.calendars);
+      
+      // Clear dropdown
+      calendarDropdown.innerHTML = '';
+      
+      // Add calendars to dropdown
+      response.calendars.forEach(calendar => {
+        const option = document.createElement('option');
+        option.value = calendar.id;
+        option.textContent = calendar.summary;
+        
+        // Mark primary calendar
+        if (calendar.primary) {
+          option.textContent += ' (Primary)';
+          option.selected = true;
+        }
+        
+        calendarDropdown.appendChild(option);
+      });
+      
+      // Show calendar selector
+      calendarSelector.classList.remove('hidden');
+      
+      // Save calendars to storage
+      await chrome.storage.local.set({ calendars: response.calendars });
+    } else {
+      console.error('Failed to load calendars:', response?.error);
+      // Keep default "primary" option
+      calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
+      calendarSelector.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error in loadCalendars:', error);
+    // Keep default "primary" option
+    calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
+    calendarSelector.classList.remove('hidden');
+  }
+}
 
 // Prevent default drag behaviors
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -307,12 +466,17 @@ createEventBtn.addEventListener('click', async () => {
     const eventData = convertICSToGoogleCalendarEvent(currentICSData);
     console.log('Event data to send:', eventData);
     
+    // Get selected calendar ID
+    const calendarId = calendarDropdown.value || 'primary';
+    console.log('Selected calendar:', calendarId);
+    
     // Send message to background script with Client ID
     // forceAuth: false - will use cached token if available
     chrome.runtime.sendMessage(
       { 
         action: 'createCalendarEvent', 
         eventData: eventData,
+        calendarId: calendarId,
         clientId: GOOGLE_CLIENT_ID,
         forceAuth: false  // Use cached token if available
       },
@@ -331,9 +495,25 @@ createEventBtn.addEventListener('click', async () => {
         createEventBtn.textContent = BUTTON_TEXT_DEFAULT;
         
         if (response && response.success) {
-          showSuccess('Event created successfully in Google Calendar! ✓');
-          // Clear the event data after successful creation
-          clearEventDisplay();
+          // Show success message
+          showSuccess('Event added to Google Calendar! ✓');
+          
+          // After 2 seconds, fade out and clear
+          setTimeout(() => {
+            // Add fade-out class
+            fileInfo.style.transition = 'opacity 0.5s ease';
+            successMessage.style.transition = 'opacity 0.5s ease';
+            fileInfo.style.opacity = '0';
+            successMessage.style.opacity = '0';
+            
+            // After fade completes, clear everything
+            setTimeout(() => {
+              clearEventDisplay();
+              // Reset opacity for next time
+              fileInfo.style.opacity = '1';
+              successMessage.style.opacity = '1';
+            }, 500); // Wait for fade animation
+          }, 2000); // Show success for 2 seconds
         } else {
           const errorMsg = response?.error || 'Unknown error occurred';
           console.error('Failed to create event:', errorMsg);
@@ -351,6 +531,7 @@ createEventBtn.addEventListener('click', async () => {
 
 function showSuccess(message) {
   successMessage.textContent = message;
+  successMessage.style.background = ''; // Reset to default green
   successMessage.classList.remove('hidden');
 }
 

@@ -7,6 +7,21 @@ let clientId = null;
 let cachedAccessToken = null;
 let tokenExpiryTime = null;
 
+// Handle extension installation
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    console.log('Extension installed - user will be prompted for authorization on first use');
+    // Set flag to indicate this is first install
+    chrome.storage.local.set({
+      isFirstInstall: true,
+      hasPromptedAuth: false,
+      isAuthorized: false
+    });
+  } else if (details.reason === 'update') {
+    console.log('Extension updated');
+  }
+});
+
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('Received message:', request.action);
@@ -32,7 +47,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       chrome.runtime.sendMessage({ action: 'statusUpdate', status: status });
     };
     
-    createCalendarEvent(request.eventData, request.clientId, request.forceAuth, sendStatus)
+    createCalendarEvent(request.eventData, request.clientId, request.calendarId || 'primary', request.forceAuth, sendStatus)
       .then(result => {
         console.log('Event created successfully:', result);
         sendResponse({ success: true, result: result });
@@ -50,6 +65,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     tokenExpiryTime = null;
     sendResponse({ success: true });
     return true;
+  }
+  
+  if (request.action === 'requestAuthorization') {
+    console.log('Requesting authorization');
+    
+    // Request authorization (interactive)
+    getAccessToken(request.clientId, true)
+      .then(token => {
+        console.log('Authorization successful');
+        sendResponse({ success: true, token: token });
+      })
+      .catch(error => {
+        console.error('Authorization failed:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep channel open for async response
+  }
+  
+  if (request.action === 'getCalendars') {
+    console.log('Getting user calendars');
+    
+    getCalendarList(request.clientId)
+      .then(calendars => {
+        console.log('Calendars retrieved:', calendars);
+        sendResponse({ success: true, calendars: calendars });
+      })
+      .catch(error => {
+        console.error('Error getting calendars:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep channel open for async response
   }
 });
 
@@ -114,7 +160,7 @@ async function authenticateWithOAuth2(clientId) {
   authUrl.searchParams.set('client_id', clientId);
   authUrl.searchParams.set('response_type', 'token');
   authUrl.searchParams.set('redirect_uri', redirectUri);
-  authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/calendar.events');
+  authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly');
   // Remove 'prompt=consent' to allow token reuse
   
   console.log('Auth URL:', authUrl.toString());
@@ -163,8 +209,67 @@ async function authenticateWithOAuth2(clientId) {
   });
 }
 
+// Get list of user's calendars
+async function getCalendarList(clientId) {
+  try {
+    // Get access token
+    const accessToken = await getAccessToken(clientId, false);
+    
+    console.log('Fetching calendar list...');
+    
+    const response = await fetch(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList',
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    if (!response.ok) {
+      console.error('Failed to get calendar list:', response.status, response.statusText);
+      
+      // If auth error, try with fresh token
+      if (response.status === 401 || response.status === 403) {
+        console.log('Auth error, retrying with fresh token...');
+        const newAccessToken = await getAccessToken(clientId, true);
+        
+        const retryResponse = await fetch(
+          'https://www.googleapis.com/calendar/v3/users/me/calendarList',
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${newAccessToken}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        
+        if (!retryResponse.ok) {
+          throw new Error(`Failed to get calendar list: ${retryResponse.status}`);
+        }
+        
+        const retryData = await retryResponse.json();
+        return retryData.items || [];
+      }
+      
+      throw new Error(`Failed to get calendar list: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Calendar list retrieved:', data.items?.length, 'calendars');
+    
+    return data.items || [];
+  } catch (error) {
+    console.error('Error in getCalendarList:', error);
+    throw error;
+  }
+}
+
 // Create calendar event
-async function createCalendarEvent(eventData, clientId, forceAuth = false, sendStatus = null) {
+async function createCalendarEvent(eventData, clientId, calendarId = 'primary', forceAuth = false, sendStatus = null) {
   try {
     if (!clientId) {
       throw new Error('No Client ID provided. Please set up your OAuth credentials.');
@@ -174,10 +279,11 @@ async function createCalendarEvent(eventData, clientId, forceAuth = false, sendS
     const accessToken = await getAccessToken(clientId, forceAuth, sendStatus);
     
     console.log('Making API request to Google Calendar...');
+    console.log('Using calendar ID:', calendarId);
     if (sendStatus) sendStatus('Adding to Calendar...');
     
     const response = await fetch(
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+      `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`,
       {
         method: 'POST',
         headers: {
@@ -209,7 +315,7 @@ async function createCalendarEvent(eventData, clientId, forceAuth = false, sendS
             // If we weren't forcing auth, try once more with fresh token
             if (!forceAuth) {
               console.log('Token might be invalid, retrying with fresh authentication...');
-              return await createCalendarEvent(eventData, clientId, true, sendStatus);
+              return await createCalendarEvent(eventData, clientId, calendarId, true, sendStatus);
             }
           }
           

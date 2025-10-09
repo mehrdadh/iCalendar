@@ -21,6 +21,50 @@ body:has(.file-info.hidden) {
   padding: 20px;
 }
 
+/* Calendar Selector */
+.calendar-selector {
+  background: white;
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-selector.hidden {
+  display: none;
+}
+
+.calendar-selector label {
+  display: block;
+  color: #495057;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.calendar-dropdown {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.calendar-dropdown:hover {
+  border-color: #667eea;
+}
+
+.calendar-dropdown:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 /* Settings Section */
 .settings-section {
   background: white;
@@ -381,12 +425,14 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   background: #d4edda;
   border: 2px solid #28a745;
   border-radius: 10px;
-  padding: 15px 20px;
+  padding: 20px 25px;
   margin-bottom: 20px;
   color: #155724;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 16px;
   text-align: center;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+  transition: opacity 0.5s ease;
 }
 
 .success-message.hidden {
