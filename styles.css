@@ -1,0 +1,363 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-width: 400px;
+  min-height: 500px;
+}
+
+.container {
+  padding: 20px;
+}
+
+/* Settings Section */
+.settings-section {
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  padding: 5px;
+}
+
+.toggle-btn.expanded {
+  transform: rotate(180deg);
+}
+
+.settings-content {
+  padding: 20px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.settings-content.hidden {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.settings-content:not(.hidden) {
+  max-height: 500px;
+}
+
+.settings-info {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.client-id-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: monospace;
+  transition: border-color 0.2s;
+}
+
+.client-id-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.save-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+}
+
+.settings-hint {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.settings-hint a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.settings-hint a:hover {
+  text-decoration: underline;
+}
+
+.status-message {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.status-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.status-message.hidden {
+  display: none;
+}
+
+.drop-zone {
+  border: 3px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
+  padding: 30px 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  margin-bottom: 20px;
+}
+
+.drop-zone:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.drop-zone.highlight {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.02);
+}
+
+.drop-zone-content {
+  pointer-events: none;
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+  color: white;
+  margin: 0 auto 15px;
+  opacity: 0.9;
+}
+
+.drop-zone h2 {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.drop-zone p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+}
+
+.file-info {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.file-info.hidden {
+  display: none;
+}
+
+.file-info h3 {
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.file-list {
+  margin-bottom: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.file-header {
+  padding: 12px 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.attribute-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  gap: 15px;
+}
+
+.attribute-item:hover {
+  background: #e9ecef;
+  transform: translateX(3px);
+}
+
+.attr-key {
+  color: #495057;
+  font-weight: 600;
+  font-size: 13px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.attr-value {
+  color: #6c757d;
+  font-size: 13px;
+  font-weight: 400;
+  word-break: break-word;
+  flex: 1;
+  text-align: right;
+}
+
+.empty-message {
+  padding: 20px;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.create-event-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.create-event-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 168, 83, 0.4);
+}
+
+.create-event-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.create-event-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.create-event-btn.hidden {
+  display: none;
+}
+
+.clear-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.clear-btn:active {
+  transform: translateY(0);
+}
+
+.error-message {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  color: #856404;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: center;
+}
+
+.error-message.hidden {
+  display: none;
+}
+
+.success-message {
+  background: #d4edda;
+  border: 2px solid #28a745;
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  color: #155724;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: center;
+}
+
+.success-message.hidden {
+  display: none;
+}
