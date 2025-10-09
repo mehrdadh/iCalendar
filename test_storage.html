@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Storage</title>
+</head>
+<body>
+  <h1>Chrome Storage Test</h1>
+  <button id="checkStorage">Check Storage</button>
+  <button id="clearStorage">Clear Storage</button>
+  <pre id="output"></pre>
+  
+  <script>
+    const output = document.getElementById('output');
+    
+    document.getElementById('checkStorage').addEventListener('click', async () => {
+      const data = await chrome.storage.local.get(null);
+      output.textContent = JSON.stringify(data, null, 2);
+    });
+    
+    document.getElementById('clearStorage').addEventListener('click', async () => {
+      await chrome.storage.local.clear();
+      output.textContent = 'Storage cleared!';
+    });
+  </script>
+</body>
+</html>

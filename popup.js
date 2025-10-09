@@ -1,3 +1,9 @@
+// Verify script is loaded
+console.log('=== POPUP.JS LOADED ===');
+console.log('Extension initialized at:', new Date().toISOString());
+console.error('ERROR TEST - If you see this, console is working!');
+console.warn('WARNING TEST - Console should show this!');
+
 // Get DOM elements
 const dropZone = document.getElementById('dropZone');
 const fileInfo = document.getElementById('fileInfo');
@@ -8,6 +14,12 @@ const successMessage = document.getElementById('successMessage');
 const eventTitle = document.getElementById('eventTitle');
 const calendarSelector = document.getElementById('calendarSelector');
 const calendarDropdown = document.getElementById('calendarDropdown');
+
+console.log('DOM elements loaded:', {
+  dropZone: !!dropZone,
+  fileInfo: !!fileInfo,
+  createEventBtn: !!createEventBtn
+});
 
 // Store parsed ICS data globally
 let currentICSData = null;
@@ -45,10 +57,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Then restore event data if available
     const stored = await chrome.storage.local.get(['eventData', 'fileName']);
+    console.log('Checking storage for cached event:', stored);
     if (stored.eventData && stored.fileName) {
+      console.log('Restoring cached event');
       currentICSData = stored.eventData;
       currentFileName = stored.fileName;
-      displayICSAttributes(stored.fileName, stored.eventData);
+      displayICSAttributes(stored.fileName, stored.eventData, false); // false = don't save back to storage
+    } else {
+      console.log('No cached event found');
     }
   } catch (error) {
     console.error('Error in DOMContentLoaded:', error);
@@ -146,6 +162,19 @@ async function loadCalendars() {
   try {
     console.log('Loading calendars...');
     
+    // First, load from cache immediately
+    const stored = await chrome.storage.local.get(['calendars']);
+    if (stored.calendars && stored.calendars.length > 0) {
+      console.log('Loading calendars from cache');
+      populateCalendarDropdown(stored.calendars);
+      calendarSelector.classList.remove('hidden');
+    } else {
+      // Show default while loading
+      calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
+      calendarSelector.classList.remove('hidden');
+    }
+    
+    // Then fetch fresh data in background
     const response = await new Promise((resolve) => {
       chrome.runtime.sendMessage(
         {
@@ -164,42 +193,51 @@ async function loadCalendars() {
     });
     
     if (response && response.success && response.calendars) {
-      console.log('Calendars loaded:', response.calendars);
+      console.log('Calendars loaded from API:', response.calendars);
       
-      // Clear dropdown
-      calendarDropdown.innerHTML = '';
-      
-      // Add calendars to dropdown
-      response.calendars.forEach(calendar => {
-        const option = document.createElement('option');
-        option.value = calendar.id;
-        option.textContent = calendar.summary;
-        
-        // Mark primary calendar
-        if (calendar.primary) {
-          option.textContent += ' (Primary)';
-          option.selected = true;
-        }
-        
-        calendarDropdown.appendChild(option);
-      });
-      
-      // Show calendar selector
-      calendarSelector.classList.remove('hidden');
+      // Update dropdown with fresh data
+      populateCalendarDropdown(response.calendars);
       
       // Save calendars to storage
       await chrome.storage.local.set({ calendars: response.calendars });
     } else {
       console.error('Failed to load calendars:', response?.error);
-      // Keep default "primary" option
-      calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
-      calendarSelector.classList.remove('hidden');
+      // If no cache and fetch failed, keep default
+      if (!stored.calendars || stored.calendars.length === 0) {
+        calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
+      }
     }
   } catch (error) {
     console.error('Error in loadCalendars:', error);
-    // Keep default "primary" option
-    calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
-    calendarSelector.classList.remove('hidden');
+  }
+}
+
+// Populate calendar dropdown with calendar list
+function populateCalendarDropdown(calendars) {
+  // Save current selection
+  const currentSelection = calendarDropdown.value;
+  
+  // Clear dropdown
+  calendarDropdown.innerHTML = '';
+  
+  // Add calendars to dropdown
+  calendars.forEach(calendar => {
+    const option = document.createElement('option');
+    option.value = calendar.id;
+    option.textContent = calendar.summary;
+    
+    // Mark primary calendar
+    if (calendar.primary) {
+      option.textContent += ' (Primary)';
+      option.selected = true;
+    }
+    
+    calendarDropdown.appendChild(option);
+  });
+  
+  // Restore previous selection if it still exists
+  if (currentSelection && Array.from(calendarDropdown.options).some(opt => opt.value === currentSelection)) {
+    calendarDropdown.value = currentSelection;
   }
 }
 
@@ -282,7 +320,10 @@ function readICSFile(file) {
 }
 
 function parseICS(content) {
-  const lines = content.split(/\r\n|\n|\r/);
+  // First, unfold lines (ICS spec: lines starting with space/tab are continuations)
+  const unfoldedContent = content.replace(/\r\n /g, '').replace(/\n /g, '').replace(/\r /g, '');
+  
+  const lines = unfoldedContent.split(/\r\n|\n|\r/);
   const attributes = {};
   let inEvent = false;
   
@@ -299,15 +340,24 @@ function parseICS(content) {
       return;
     }
     
+    if (!inEvent) return;
+    
     // Parse key-value pairs
     const colonIndex = line.indexOf(':');
     if (colonIndex > 0) {
       const key = line.substring(0, colonIndex);
-      const value = line.substring(colonIndex + 1);
+      let value = line.substring(colonIndex + 1);
       
       // Handle special keys with parameters (e.g., DTSTART;TZID=...)
       const semicolonIndex = key.indexOf(';');
       const cleanKey = semicolonIndex > 0 ? key.substring(0, semicolonIndex) : key;
+      
+      // Decode ICS escape sequences
+      // Per RFC 5545: \n = newline, \, = comma, \; = semicolon, \\ = backslash
+      value = value.replace(/\\n/g, '\n');
+      value = value.replace(/\\,/g, ',');
+      value = value.replace(/\\;/g, ';');
+      value = value.replace(/\\\\/g, '\\');
       
       // Store the attribute
       if (!attributes[cleanKey]) {
@@ -320,18 +370,25 @@ function parseICS(content) {
   return attributes;
 }
 
-function displayICSAttributes(fileName, attributes) {
+function displayICSAttributes(fileName, attributes, saveToStorage = true) {
   // Store data globally
   currentICSData = attributes;
   currentFileName = fileName;
   
-  // Save to storage for persistence
-  chrome.storage.local.set({
-    eventData: attributes,
-    fileName: fileName
-  }).catch(error => {
-    console.error('Error saving event data:', error);
-  });
+  // Save to storage for persistence (only if requested)
+  if (saveToStorage) {
+    console.log('Saving event to storage:', fileName);
+    chrome.storage.local.set({
+      eventData: attributes,
+      fileName: fileName
+    }).then(() => {
+      console.log('✓ Event saved to storage');
+    }).catch(error => {
+      console.error('Error saving event data:', error);
+    });
+  } else {
+    console.log('Skipping save to storage (restoring from cache)');
+  }
   
   fileInfo.classList.remove('hidden');
   createEventBtn.classList.remove('hidden');
@@ -433,7 +490,8 @@ function formatFileSize(bytes) {
 }
 
 // Clear functionality - resets when a new file is dropped
-function clearEventDisplay() {
+async function clearEventDisplay() {
+  console.log('clearEventDisplay() called');
   fileList.innerHTML = '';
   fileInfo.classList.add('hidden');
   errorMessage.classList.add('hidden');
@@ -444,9 +502,17 @@ function clearEventDisplay() {
   currentFileName = null;
   
   // Clear storage
-  chrome.storage.local.remove(['eventData', 'fileName']).catch(error => {
+  try {
+    console.log('Attempting to clear storage...');
+    await chrome.storage.local.remove(['eventData', 'fileName']);
+    console.log('✓ Event data cleared from storage');
+    
+    // Verify it's actually cleared
+    const check = await chrome.storage.local.get(['eventData', 'fileName']);
+    console.log('Storage after clear:', check);
+  } catch (error) {
     console.error('Error clearing event data:', error);
-  });
+  }
 }
 
 // Create event button functionality
@@ -507,8 +573,8 @@ createEventBtn.addEventListener('click', async () => {
             successMessage.style.opacity = '0';
             
             // After fade completes, clear everything
-            setTimeout(() => {
-              clearEventDisplay();
+            setTimeout(async () => {
+              await clearEventDisplay();
               // Reset opacity for next time
               fileInfo.style.opacity = '1';
               successMessage.style.opacity = '1';

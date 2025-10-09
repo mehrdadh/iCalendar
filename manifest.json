@@ -3,6 +3,11 @@
     "name": "iCalendar",
     "version": "1.0.0",
     "description": "Import iCalendar (.ics) files to Google Calendar with simple drag and drop.",
+    "icons": {
+        "16": "images/logo.png",
+        "48": "images/logo.png",
+        "128": "images/logo.png"
+    },
     "action": {
         "default_popup": "popup.html",
         "default_title": "iCalendar"
