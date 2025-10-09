@@ -26,7 +26,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   
   if (request.action === 'createCalendarEvent') {
     console.log('Creating calendar event');
-    createCalendarEvent(request.eventData, request.clientId, request.forceAuth)
+    
+    // Send status updates to popup
+    const sendStatus = (status) => {
+      chrome.runtime.sendMessage({ action: 'statusUpdate', status: status });
+    };
+    
+    createCalendarEvent(request.eventData, request.clientId, request.forceAuth, sendStatus)
       .then(result => {
         console.log('Event created successfully:', result);
         sendResponse({ success: true, result: result });
@@ -71,7 +77,7 @@ function isTokenValid() {
 }
 
 // Get access token (from cache or by authenticating)
-async function getAccessToken(clientId, forceAuth = false) {
+async function getAccessToken(clientId, forceAuth = false, sendStatus = null) {
   // If forcing authentication, clear cache
   if (forceAuth) {
     console.log('Forcing new authentication');
@@ -87,6 +93,8 @@ async function getAccessToken(clientId, forceAuth = false) {
   
   // Need to authenticate
   console.log('Authenticating with OAuth 2.0...');
+  if (sendStatus) sendStatus('Authenticating...');
+  
   const tokenData = await authenticateWithOAuth2(clientId);
   
   // Cache the token
@@ -156,16 +164,18 @@ async function authenticateWithOAuth2(clientId) {
 }
 
 // Create calendar event
-async function createCalendarEvent(eventData, clientId, forceAuth = false) {
+async function createCalendarEvent(eventData, clientId, forceAuth = false, sendStatus = null) {
   try {
     if (!clientId) {
       throw new Error('No Client ID provided. Please set up your OAuth credentials.');
     }
     
     // Get access token (cached or new)
-    const accessToken = await getAccessToken(clientId, forceAuth);
+    const accessToken = await getAccessToken(clientId, forceAuth, sendStatus);
     
     console.log('Making API request to Google Calendar...');
+    if (sendStatus) sendStatus('Adding to Calendar...');
+    
     const response = await fetch(
       'https://www.googleapis.com/calendar/v3/calendars/primary/events',
       {
@@ -199,7 +209,7 @@ async function createCalendarEvent(eventData, clientId, forceAuth = false) {
             // If we weren't forcing auth, try once more with fresh token
             if (!forceAuth) {
               console.log('Token might be invalid, retrying with fresh authentication...');
-              return await createCalendarEvent(eventData, clientId, true);
+              return await createCalendarEvent(eventData, clientId, true, sendStatus);
             }
           }
           

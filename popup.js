@@ -2,10 +2,10 @@
 const dropZone = document.getElementById('dropZone');
 const fileInfo = document.getElementById('fileInfo');
 const fileList = document.getElementById('fileList');
-const clearBtn = document.getElementById('clearBtn');
 const errorMessage = document.getElementById('errorMessage');
 const createEventBtn = document.getElementById('createEventBtn');
 const successMessage = document.getElementById('successMessage');
+const eventTitle = document.getElementById('eventTitle');
 
 // Store parsed ICS data globally
 let currentICSData = null;
@@ -14,6 +14,35 @@ let currentFileName = null;
 // Your Client ID - you can change this
 // const GOOGLE_CLIENT_ID = '464187272652-jopvbqtpda8bmoaajn1qj9lg8erstd2j.apps.googleusercontent.com';
 const GOOGLE_CLIENT_ID = '464187272652-0cjnf3o7e61ufk4lf6fvhulrra1hs3vs.apps.googleusercontent.com';
+
+// Button text constants
+const BUTTON_TEXT_DEFAULT = 'Add to Calendar';
+const BUTTON_TEXT_PROCESSING = 'Processing...';
+const BUTTON_TEXT_AUTHENTICATING = 'Authenticating...';
+const BUTTON_TEXT_ADDING = 'Adding to Calendar...';
+
+// Listen for status updates from background script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'statusUpdate') {
+    if (createEventBtn) {
+      createEventBtn.textContent = request.status;
+    }
+  }
+});
+
+// Restore event data when popup opens
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const stored = await chrome.storage.local.get(['eventData', 'fileName']);
+    if (stored.eventData && stored.fileName) {
+      currentICSData = stored.eventData;
+      currentFileName = stored.fileName;
+      displayICSAttributes(stored.fileName, stored.eventData);
+    }
+  } catch (error) {
+    console.error('Error restoring event data:', error);
+  }
+});
 
 // Prevent default drag behaviors
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -55,9 +84,7 @@ function handleDrop(e) {
 
 function handleFiles(files) {
   // Clear previous displays
-  fileList.innerHTML = '';
-  fileInfo.classList.add('hidden');
-  errorMessage.classList.add('hidden');
+  clearEventDisplay();
   
   // Only handle single file
   if (files.length === 0) return;
@@ -139,46 +166,64 @@ function displayICSAttributes(fileName, attributes) {
   currentICSData = attributes;
   currentFileName = fileName;
   
+  // Save to storage for persistence
+  chrome.storage.local.set({
+    eventData: attributes,
+    fileName: fileName
+  }).catch(error => {
+    console.error('Error saving event data:', error);
+  });
+  
   fileInfo.classList.remove('hidden');
   createEventBtn.classList.remove('hidden');
   
-  // Create header with file name
-  const header = document.createElement('div');
-  header.className = 'file-header';
-  header.innerHTML = `<strong>File:</strong> ${fileName}`;
-  fileList.appendChild(header);
-  
-  // Display attributes
-  const attributeKeys = Object.keys(attributes).sort();
-  
-  if (attributeKeys.length === 0) {
+  // Check if we have data
+  if (Object.keys(attributes).length === 0) {
     const emptyMsg = document.createElement('div');
     emptyMsg.className = 'empty-message';
-    emptyMsg.textContent = 'No attributes found in this ICS file.';
+    emptyMsg.textContent = 'No event data found in this ICS file.';
     fileList.appendChild(emptyMsg);
     createEventBtn.classList.add('hidden');
+    eventTitle.textContent = 'Event';
     return;
   }
   
-  attributeKeys.forEach(key => {
-    const values = attributes[key];
-    
-    values.forEach((value, index) => {
+  // Get the event title (SUMMARY) and set it as the heading
+  const summary = attributes['SUMMARY'];
+  if (summary && summary.length > 0) {
+    eventTitle.textContent = summary[0];
+  } else {
+    eventTitle.textContent = 'Untitled Event';
+  }
+  
+  // Define the fields we want to display in order (without SUMMARY since it's in the title)
+  const fieldsToDisplay = [
+    { key: 'DTSTART', label: 'Start Time' },
+    { key: 'DTEND', label: 'End Time' },
+    { key: 'LOCATION', label: 'Location' }
+  ];
+  
+  // Display only the specified fields
+  fieldsToDisplay.forEach(field => {
+    const values = attributes[field.key];
+    if (values && values.length > 0) {
+      const value = values[0]; // Take first value
+      
       const attrDiv = document.createElement('div');
       attrDiv.className = 'attribute-item';
       
       const keySpan = document.createElement('span');
       keySpan.className = 'attr-key';
-      keySpan.textContent = values.length > 1 ? `${key} [${index + 1}]` : key;
+      keySpan.textContent = field.label;
       
       const valueSpan = document.createElement('span');
       valueSpan.className = 'attr-value';
-      valueSpan.textContent = formatAttributeValue(key, value);
+      valueSpan.textContent = formatAttributeValue(field.key, value);
       
       attrDiv.appendChild(keySpan);
       attrDiv.appendChild(valueSpan);
       fileList.appendChild(attrDiv);
-    });
+    }
   });
 }
 
@@ -228,16 +273,22 @@ function formatFileSize(bytes) {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
-// Clear button functionality
-clearBtn.addEventListener('click', () => {
+// Clear functionality - resets when a new file is dropped
+function clearEventDisplay() {
   fileList.innerHTML = '';
   fileInfo.classList.add('hidden');
   errorMessage.classList.add('hidden');
   successMessage.classList.add('hidden');
   createEventBtn.classList.add('hidden');
+  eventTitle.textContent = 'Event';
   currentICSData = null;
   currentFileName = null;
-});
+  
+  // Clear storage
+  chrome.storage.local.remove(['eventData', 'fileName']).catch(error => {
+    console.error('Error clearing event data:', error);
+  });
+}
 
 // Create event button functionality
 createEventBtn.addEventListener('click', async () => {
@@ -246,9 +297,9 @@ createEventBtn.addEventListener('click', async () => {
     return;
   }
   
-  // Disable button and show loading state
+  // Disable button and show initial loading state
   createEventBtn.disabled = true;
-  createEventBtn.textContent = 'Authenticating...';
+  createEventBtn.textContent = BUTTON_TEXT_PROCESSING;
   errorMessage.classList.add('hidden');
   successMessage.classList.add('hidden');
   
@@ -270,17 +321,19 @@ createEventBtn.addEventListener('click', async () => {
         if (chrome.runtime.lastError) {
           console.error('Runtime error:', chrome.runtime.lastError);
           createEventBtn.disabled = false;
-          createEventBtn.textContent = 'Create Google Calendar Event';
+          createEventBtn.textContent = BUTTON_TEXT_DEFAULT;
           showError(`Connection error: ${chrome.runtime.lastError.message}`);
           return;
         }
         
         console.log('Response from background:', response);
         createEventBtn.disabled = false;
-        createEventBtn.textContent = 'Create Google Calendar Event';
+        createEventBtn.textContent = BUTTON_TEXT_DEFAULT;
         
         if (response && response.success) {
           showSuccess('Event created successfully in Google Calendar! ✓');
+          // Clear the event data after successful creation
+          clearEventDisplay();
         } else {
           const errorMsg = response?.error || 'Unknown error occurred';
           console.error('Failed to create event:', errorMsg);
@@ -291,7 +344,7 @@ createEventBtn.addEventListener('click', async () => {
   } catch (error) {
     console.error('Error in createEventBtn click handler:', error);
     createEventBtn.disabled = false;
-    createEventBtn.textContent = 'Create Google Calendar Event';
+    createEventBtn.textContent = BUTTON_TEXT_DEFAULT;
     showError(`Error: ${error.message}`);
   }
 });

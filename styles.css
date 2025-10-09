@@ -9,6 +9,12 @@ body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-width: 400px;
   min-height: 500px;
+  transition: min-height 0.3s ease;
+}
+
+/* Compact body when only drop zone is visible */
+body:has(.file-info.hidden) {
+  min-height: auto;
 }
 
 .container {
@@ -155,15 +161,15 @@ body {
 }
 
 .drop-zone {
-  border: 3px dashed rgba(255, 255, 255, 0.5);
-  border-radius: 15px;
-  padding: 30px 30px;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 20px 20px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  margin-bottom: 20px;
+  margin-top: 15px;
 }
 
 .drop-zone:hover {
@@ -183,23 +189,23 @@ body {
 }
 
 .icon {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   color: white;
-  margin: 0 auto 15px;
+  margin: 0 auto 10px;
   opacity: 0.9;
 }
 
 .drop-zone h2 {
   color: white;
-  font-size: 18px;
-  margin-bottom: 8px;
+  font-size: 15px;
+  margin-bottom: 5px;
   font-weight: 600;
 }
 
 .drop-zone p {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .file-info {
@@ -207,23 +213,39 @@ body {
   border-radius: 15px;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 15px;
 }
 
 .file-info.hidden {
   display: none;
 }
 
+/* Show drop zone message when no event is loaded */
+body:not(:has(.file-info:not(.hidden))) .drop-zone {
+  padding: 40px 30px;
+}
+
+body:not(:has(.file-info:not(.hidden))) .drop-zone .icon {
+  width: 48px;
+  height: 48px;
+}
+
+body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
+  font-size: 18px;
+}
+
 .file-info h3 {
   color: #333;
-  font-size: 18px;
-  margin-bottom: 15px;
-  font-weight: 600;
+  font-size: 20px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
 }
 
 .file-list {
   margin-bottom: 15px;
-  max-height: 400px;
-  overflow-y: auto;
 }
 
 .file-header {
@@ -255,18 +277,27 @@ body {
 .attr-key {
   color: #495057;
   font-weight: 600;
-  font-size: 13px;
-  min-width: 140px;
+  font-size: 14px;
+  min-width: 100px;
   flex-shrink: 0;
 }
 
 .attr-value {
-  color: #6c757d;
-  font-size: 13px;
-  font-weight: 400;
-  word-break: break-word;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
   flex: 1;
   text-align: right;
+  max-width: 250px;
+  word-break: break-word;
+  line-height: 1.4;
+  
+  /* Multi-line ellipsis */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
 }
 
 .empty-message {
