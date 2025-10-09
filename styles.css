@@ -280,8 +280,8 @@ body:has(.file-info.hidden) {
 
 .file-info {
   background: white;
-  border-radius: 15px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   margin-bottom: 15px;
 }
@@ -306,16 +306,16 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
 
 .file-info h3 {
   color: #333;
-  font-size: 20px;
-  margin-bottom: 20px;
+  font-size: 16px;
+  margin-bottom: 12px;
   font-weight: 700;
   text-align: center;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
   border-bottom: 2px solid #e0e0e0;
 }
 
 .file-list {
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .file-header {
@@ -331,12 +331,12 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 12px 15px;
+  padding: 8px 12px;
   background: #f8f9fa;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  border-radius: 6px;
+  margin-bottom: 6px;
   transition: all 0.2s ease;
-  gap: 15px;
+  gap: 12px;
 }
 
 .attribute-item:hover {

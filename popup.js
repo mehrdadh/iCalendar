@@ -1,3 +1,6 @@
+// ===== FEATURE FLAGS =====
+const ENABLE_EVENT_CACHING = false; // Set to false to disable event persistence across sessions
+
 // Verify script is loaded
 console.log('=== POPUP.JS LOADED ===');
 console.log('Extension initialized at:', new Date().toISOString());
@@ -55,16 +58,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       await loadCalendars();
     }
     
-    // Then restore event data if available
-    const stored = await chrome.storage.local.get(['eventData', 'fileName']);
-    console.log('Checking storage for cached event:', stored);
-    if (stored.eventData && stored.fileName) {
-      console.log('Restoring cached event');
-      currentICSData = stored.eventData;
-      currentFileName = stored.fileName;
-      displayICSAttributes(stored.fileName, stored.eventData, false); // false = don't save back to storage
-    } else {
-      console.log('No cached event found');
+    // Then restore event data if available (if caching is enabled)
+    if (ENABLE_EVENT_CACHING) {
+      const stored = await chrome.storage.local.get(['eventData', 'fileName']);
+      console.log('Checking storage for cached event:', stored);
+      if (stored.eventData && stored.fileName) {
+        console.log('Restoring cached event');
+        currentICSData = stored.eventData;
+        currentFileName = stored.fileName;
+        displayICSAttributes(stored.fileName, stored.eventData, false); // false = don't save back to storage
+      } else {
+        console.log('No cached event found');
+      }
     }
   } catch (error) {
     console.error('Error in DOMContentLoaded:', error);
@@ -375,8 +380,8 @@ function displayICSAttributes(fileName, attributes, saveToStorage = true) {
   currentICSData = attributes;
   currentFileName = fileName;
   
-  // Save to storage for persistence (only if requested)
-  if (saveToStorage) {
+  // Save to storage for persistence (only if caching is enabled and requested)
+  if (saveToStorage && ENABLE_EVENT_CACHING) {
     console.log('Saving event to storage:', fileName);
     chrome.storage.local.set({
       eventData: attributes,
@@ -386,8 +391,10 @@ function displayICSAttributes(fileName, attributes, saveToStorage = true) {
     }).catch(error => {
       console.error('Error saving event data:', error);
     });
-  } else {
+  } else if (!saveToStorage) {
     console.log('Skipping save to storage (restoring from cache)');
+  } else {
+    console.log('Skipping save to storage (caching disabled)');
   }
   
   fileInfo.classList.remove('hidden');
@@ -501,17 +508,19 @@ async function clearEventDisplay() {
   currentICSData = null;
   currentFileName = null;
   
-  // Clear storage
-  try {
-    console.log('Attempting to clear storage...');
-    await chrome.storage.local.remove(['eventData', 'fileName']);
-    console.log('✓ Event data cleared from storage');
-    
-    // Verify it's actually cleared
-    const check = await chrome.storage.local.get(['eventData', 'fileName']);
-    console.log('Storage after clear:', check);
-  } catch (error) {
-    console.error('Error clearing event data:', error);
+  // Clear storage (only if caching is enabled)
+  if (ENABLE_EVENT_CACHING) {
+    try {
+      console.log('Attempting to clear storage...');
+      await chrome.storage.local.remove(['eventData', 'fileName']);
+      console.log('✓ Event data cleared from storage');
+      
+      // Verify it's actually cleared
+      const check = await chrome.storage.local.get(['eventData', 'fileName']);
+      console.log('Storage after clear:', check);
+    } catch (error) {
+      console.error('Error clearing event data:', error);
+    }
   }
 }
 
