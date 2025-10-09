@@ -1,16 +1,19 @@
 # ICS File Reader Chrome Extension
 
-A Chrome extension that reads .ics calendar files and creates Google Calendar events from them.
+A Chrome extension that reads .ics calendar files and creates Google Calendar events from them with a beautiful, modern interface.
 
 ## Features
 
-- 📁 Drag and drop .ics files onto the extension popup
-- 📝 Displays all ICS file attributes (summary, dates, location, description, etc.)
-- 📅 Create Google Calendar events directly from ICS files
-- 🎨 Modern, gradient UI design
-- 🖱️ Click to browse files as an alternative to drag and drop
-- ✅ Success/error messages for user feedback
-- 🧹 Clear button to reset the display
+- 📁 **Drag and drop** .ics files onto the extension popup
+- 📝 **Smart parsing** - Displays key event details (title, time, location)
+- 📅 **Multi-calendar support** - Choose which Google Calendar to add events to
+- 🎨 **Modern, gradient UI** - Purple gradient theme with clean design
+- 🖱️ **Click to browse** - Alternative file selection method
+- ✅ **Instant feedback** - Success/error messages with smooth animations
+- 🔄 **Auto-clear** - Event data clears after successful creation
+- 🔐 **Secure OAuth** - First-time authentication, then cached tokens
+- 📏 **Compact design** - Optimized spacing and font sizes
+- 🎯 **ICS standard compliant** - Proper handling of escape sequences and line folding
 
 ## Installation
 
@@ -39,46 +42,60 @@ See [USER_SETUP_GUIDE.md](USER_SETUP_GUIDE.md) for detailed instructions.
 
 ### Step 4: Configure the Extension
 
-1. Click the extension icon
-2. Click **"⚙️ Google OAuth Setup"** section
-3. Paste your Client ID
-4. Click **"Save"**
-5. Done! ✓
+1. Open `popup.js` in your code editor
+2. Find line ~16: `const GOOGLE_CLIENT_ID = '...'`
+3. Replace with your Client ID
+4. Save the file
+5. Reload the extension in Chrome
 
 ### Step 5: Use the Extension
 
-1. Drag and drop an `.ics` file
-2. Review the file attributes
-3. Click **"Create Google Calendar Event"**
-4. **Google sign-in popup appears** - Sign in and grant permission
-5. Event created! ✓
+1. Click the extension icon - **You'll be prompted to authorize on first use**
+2. Sign in with Google and grant calendar permissions
+3. Your calendars will load automatically
+4. Drag and drop an `.ics` file (or click to browse)
+5. Review the event details (title, time, location)
+6. Select which calendar to add the event to
+7. Click **"Add to Calendar"**
+8. Event created! ✓ (Display auto-clears after 2.5 seconds)
 
 ## Files Structure
 
 ```
 chrome_extension/
-├── manifest.json          # Extension configuration
-├── popup.html             # Extension popup UI with settings
-├── popup.js               # ICS parsing and event creation
-├── auth.js                # OAuth authentication handler
-├── background.js          # Background service worker
-├── styles.css             # Styling
+├── manifest.json          # Extension configuration with OAuth2 scopes
+├── popup.html             # Extension popup UI
+├── popup.js               # ICS parsing, UI logic, and event creation
+├── background.js          # OAuth authentication and Google Calendar API calls
+├── styles.css             # Modern purple gradient theme styling
 ├── README.md              # This file
-├── USER_SETUP_GUIDE.md    # Step-by-step setup guide for users
-└── SETUP.md               # Detailed OAuth configuration guide
+├── USER_SETUP_GUIDE.md    # Step-by-step OAuth setup guide
+└── TOKEN_CACHING_INFO.md  # Token caching behavior documentation
 ```
 
 ## How It Works
 
-1. **File Validation**: The extension checks if the uploaded file has a `.ics` extension
-2. **ICS Parsing**: Reads and parses the ICS file to extract calendar event attributes
-3. **Display**: Shows all attributes in a clean, organized format
-4. **User Authentication**: When you click "Create Google Calendar Event", a Google sign-in popup appears asking for permission
-5. **OAuth Flow**: The extension requests fresh authentication each time (no cached tokens)
-6. **Event Creation**: Converts ICS data to Google Calendar API format and creates the event
-7. **Feedback**: Displays success or error messages to the user
+1. **First-Time Setup**: On first use, you'll be prompted to authorize with Google Calendar
+2. **Calendar Loading**: Your Google Calendars load automatically and are cached for quick access
+3. **File Validation**: Drag and drop validates `.ics` file extension
+4. **ICS Parsing**: 
+   - Handles line folding per RFC 5545
+   - Decodes escape sequences (`\n` → newlines, etc.)
+   - Extracts key event data
+5. **Smart Display**: Shows only essential info (event title as heading, start/end times, location)
+6. **Calendar Selection**: Choose which Google Calendar to add the event to
+7. **Token Caching**: OAuth tokens are cached with 5-minute expiry buffer for smooth UX
+8. **Event Creation**: Converts ICS data to Google Calendar API format and creates the event
+9. **Auto-Clear**: Success message shows for 2 seconds, then fades out with event data cleared
 
-All file processing happens locally in your browser. The extension only communicates with Google Calendar API when you click "Create Google Calendar Event", and **always prompts you for permission** each time.
+### Feature Flags
+
+Event caching can be toggled in `popup.js`:
+```javascript
+const ENABLE_EVENT_CACHING = false; // Set to true to persist events across sessions
+```
+
+All file processing happens locally in your browser. The extension only communicates with Google Calendar API when loading calendars or creating events.
 
 ## What Gets Created in Google Calendar
 
@@ -106,19 +123,34 @@ The extension extracts and creates events with the following information from yo
 
 **"Failed to create event" error**
 - Check that you've completed the Google Calendar API setup
-- Verify your Client ID is correct in `manifest.json`
+- Verify your Client ID is correct in `popup.js` (line ~16)
 - Make sure you're added as a test user in Google Cloud Console
-- Try signing out and signing in again
+- Ensure Calendar API is enabled in your Google Cloud project
+- Try reloading the extension
+
+**No calendars showing**
+- Check browser console for errors (Right-click popup → Inspect → Console)
+- Verify you granted calendar.readonly permission
+- Reload the extension and reauthorize
 
 **OAuth/Authentication errors**
-- See the detailed troubleshooting section in [SETUP.md](SETUP.md)
+- See [USER_SETUP_GUIDE.md](USER_SETUP_GUIDE.md) for setup instructions
+- See [TOKEN_CACHING_INFO.md](TOKEN_CACHING_INFO.md) for token behavior
+
+**Event not persisting after closing popup**
+- This is expected behavior with `ENABLE_EVENT_CACHING = false`
+- Set flag to `true` in `popup.js` to enable persistence
 
 ## Privacy & Security
 
 - Files are processed locally in your browser
 - No data is sent to any server except Google Calendar API
-- The extension only requests permission to create calendar events
-- You can revoke access anytime in your Google Account settings
+- OAuth tokens are cached locally with expiry management
+- The extension requests two permissions:
+  - `calendar.events` - Create calendar events
+  - `calendar.readonly` - Read your calendar list
+- You can revoke access anytime in your [Google Account settings](https://myaccount.google.com/permissions)
+- Event caching is disabled by default (no data persists after popup closes)
 
 ## License
 

@@ -28,9 +28,9 @@ console.log('DOM elements loaded:', {
 let currentICSData = null;
 let currentFileName = null;
 
-// Your Client ID - you can change this
-// const GOOGLE_CLIENT_ID = '464187272652-jopvbqtpda8bmoaajn1qj9lg8erstd2j.apps.googleusercontent.com';
-const GOOGLE_CLIENT_ID = '464187272652-0cjnf3o7e61ufk4lf6fvhulrra1hs3vs.apps.googleusercontent.com';
+// Get Client ID from manifest.json
+const manifest = chrome.runtime.getManifest();
+const GOOGLE_CLIENT_ID = manifest.oauth2.client_id;
 
 // Button text constants
 const BUTTON_TEXT_DEFAULT = 'Add to Calendar';
