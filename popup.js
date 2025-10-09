@@ -2,7 +2,7 @@
 console.log('=== POPUP.JS LOADED ===');
 console.log('Extension initialized at:', new Date().toISOString());
 // console.error('ERROR TEST - If you see this, console is working!');
-console.warn('WARNING TEST - Console should show this!');
+// console.warn('WARNING TEST - Console should show this!');
 
 // Get DOM elements
 const dropZone = document.getElementById('dropZone');
