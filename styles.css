@@ -20,6 +20,11 @@ body:has(.file-info.hidden) {
 
 .container {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 40px);
 }
 
 /* Header with Logo */
@@ -31,6 +36,7 @@ body:has(.file-info.hidden) {
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
 }
 
 .logo {
@@ -55,6 +61,7 @@ body:has(.file-info.hidden) {
   padding: 15px 20px;
   margin-bottom: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .calendar-selector.hidden {
@@ -241,6 +248,7 @@ body:has(.file-info.hidden) {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   margin-top: 15px;
+  width: 100%;
 }
 
 .drop-zone:hover {
@@ -285,6 +293,7 @@ body:has(.file-info.hidden) {
   padding: 15px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   margin-bottom: 15px;
+  width: 100%;
 }
 
 .file-info.hidden {
@@ -442,6 +451,7 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   font-weight: 500;
   font-size: 14px;
   text-align: center;
+  width: 100%;
 }
 
 .error-message.hidden {
@@ -460,6 +470,7 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   text-align: center;
   box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
   transition: opacity 0.5s ease;
+  width: 100%;
 }
 
 .success-message.hidden {

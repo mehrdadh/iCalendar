@@ -2,10 +2,11 @@
 
 console.log('Background script loaded');
 
-// Store the Client ID and access token
+// Store the Client ID (in memory only)
 let clientId = null;
-let cachedAccessToken = null;
-let tokenExpiryTime = null;
+
+// Token cache will be stored in chrome.storage.local for persistence across service worker restarts
+// This ensures the user doesn't have to re-authenticate every time the service worker is terminated
 
 // Handle extension installation
 chrome.runtime.onInstalled.addListener((details) => {
@@ -61,10 +62,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   
   if (request.action === 'clearToken') {
     console.log('Clearing cached token');
-    cachedAccessToken = null;
-    tokenExpiryTime = null;
-    sendResponse({ success: true });
-    return true;
+    chrome.storage.local.remove(['cachedAccessToken', 'tokenExpiryTime'], () => {
+      sendResponse({ success: true });
+    });
+    return true; // Keep channel open for async response
   }
   
   if (request.action === 'requestAuthorization') {
@@ -99,13 +100,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Check if cached token is still valid
-function isTokenValid() {
-  if (!cachedAccessToken) {
+// Check if cached token is still valid (reads from storage)
+async function isTokenValid() {
+  const stored = await chrome.storage.local.get(['cachedAccessToken', 'tokenExpiryTime']);
+  
+  if (!stored.cachedAccessToken) {
     return false;
   }
   
-  if (!tokenExpiryTime) {
+  if (!stored.tokenExpiryTime) {
     return false;
   }
   
@@ -113,7 +116,7 @@ function isTokenValid() {
   const now = Date.now();
   const bufferTime = 5 * 60 * 1000; // 5 minutes
   
-  if (now >= (tokenExpiryTime - bufferTime)) {
+  if (now >= (stored.tokenExpiryTime - bufferTime)) {
     console.log('Token expired or about to expire');
     return false;
   }
@@ -127,14 +130,14 @@ async function getAccessToken(clientId, forceAuth = false, sendStatus = null) {
   // If forcing authentication, clear cache
   if (forceAuth) {
     console.log('Forcing new authentication');
-    cachedAccessToken = null;
-    tokenExpiryTime = null;
+    await chrome.storage.local.remove(['cachedAccessToken', 'tokenExpiryTime']);
   }
   
   // Check if we have a valid cached token
-  if (isTokenValid()) {
+  if (await isTokenValid()) {
     console.log('Using cached access token');
-    return cachedAccessToken;
+    const stored = await chrome.storage.local.get(['cachedAccessToken']);
+    return stored.cachedAccessToken;
   }
   
   // Need to authenticate
@@ -143,12 +146,15 @@ async function getAccessToken(clientId, forceAuth = false, sendStatus = null) {
   
   const tokenData = await authenticateWithOAuth2(clientId);
   
-  // Cache the token
-  cachedAccessToken = tokenData.accessToken;
-  tokenExpiryTime = Date.now() + (tokenData.expiresIn * 1000);
+  // Cache the token in storage (persists across service worker restarts)
+  const expiryTime = Date.now() + (tokenData.expiresIn * 1000);
+  await chrome.storage.local.set({
+    cachedAccessToken: tokenData.accessToken,
+    tokenExpiryTime: expiryTime
+  });
   
-  console.log('Token cached, expires in', tokenData.expiresIn, 'seconds');
-  return cachedAccessToken;
+  console.log('Token cached to storage, expires in', tokenData.expiresIn, 'seconds');
+  return tokenData.accessToken;
 }
 
 // OAuth 2.0 authentication using web flow
