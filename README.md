@@ -169,7 +169,6 @@ The extension extracts and creates events with the following information from yo
   - `calendar.readonly` - Read your calendar list
 - You can revoke access anytime in your [Google Account settings](https://myaccount.google.com/permissions)
 - Event caching is disabled by default (no data persists after popup closes)
-- **Full privacy policy:** See [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) for complete details
 
 ## Contributing
 
