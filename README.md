@@ -1,4 +1,4 @@
-# ICS File Reader Chrome Extension
+# ICS File Importer Chrome Extension
 
 A Chrome extension that reads .ics calendar files and creates Google Calendar events from them with a beautiful, modern interface.
 
