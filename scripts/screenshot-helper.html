@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screenshot Helper - Chrome Web Store Size</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .info {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #ffc107;
+    }
+    
+    .screenshot-frame {
+      width: 640px;
+      height: 400px;
+      border: 2px solid #333;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .screenshot-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
+    .instructions {
+      margin-top: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .instructions h2 {
+      margin-top: 0;
+      color: #4285F4;
+    }
+    
+    .instructions ol {
+      line-height: 1.8;
+    }
+    
+    .dimensions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    button {
+      background: #4285F4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    
+    button:hover {
+      background: #357ae8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📸 Chrome Web Store Screenshot Helper</h1>
+    
+    <div class="info">
+      <strong>⚠️ Important:</strong> This frame is exactly 640×400 pixels - the required size for Chrome Web Store screenshots.
+      <br>Your extension popup will appear smaller inside because Chrome extensions have size limits.
+    </div>
+    
+    <div class="screenshot-frame">
+      <iframe src="popup.html"></iframe>
+    </div>
+    
+    <div class="instructions">
+      <h2>📋 How to Take Screenshots:</h2>
+      
+      <h3>Method 1: Built-in Screenshot Tool</h3>
+      <ol>
+        <li>Load your extension in Chrome normally</li>
+        <li>Click the extension icon to open the popup</li>
+        <li><strong>Mac:</strong> Press <code>Cmd + Shift + 4</code>, then press <code>Space</code>, click the popup window</li>
+        <li><strong>Windows:</strong> Use Snipping Tool or <code>Win + Shift + S</code></li>
+        <li>Resize the image to exactly 1280×800 using an image editor if needed</li>
+      </ol>
+      
+      <h3>Method 2: Chrome DevTools (Most Accurate)</h3>
+      <ol>
+        <li>Load your extension and open the popup</li>
+        <li>Right-click the popup → Inspect</li>
+        <li>Press <code>Cmd + Shift + M</code> (Mac) or <code>Ctrl + Shift + M</code> (Windows) for device toolbar</li>
+        <li>Set dimensions to <strong>1280×800</strong> in the toolbar</li>
+        <li>Click the "..." menu → "Capture screenshot"</li>
+      </ol>
+      
+      <h3>Method 3: Online Tools</h3>
+      <ol>
+        <li>Take a screenshot of your extension</li>
+        <li>Use a tool like:
+          <ul>
+            <li><a href="https://www.canva.com" target="_blank">Canva</a> - Add to 1280×800 canvas</li>
+            <li><a href="https://www.figma.com" target="_blank">Figma</a> - Professional mockups</li>
+            <li><a href="https://imageresizer.com" target="_blank">Image Resizer</a> - Resize to exact dimensions</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <h3>📸 Screenshots You Should Take:</h3>
+      <ol>
+        <li><strong>Screenshot 1:</strong> Clean drop zone (initial state)</li>
+        <li><strong>Screenshot 2:</strong> Calendar selection dropdown open</li>
+        <li><strong>Screenshot 3:</strong> Event details displayed after file drop</li>
+        <li><strong>Screenshot 4:</strong> Success message after creating event</li>
+        <li><strong>Screenshot 5:</strong> (Optional) Full workflow composite</li>
+      </ol>
+      
+      <h3>💡 Tips for Great Screenshots:</h3>
+      <ul>
+        <li>✅ Use consistent sample data (same event across screenshots)</li>
+        <li>✅ Show the extension in action, not empty states</li>
+        <li>✅ Keep UI clean - no error messages in screenshots</li>
+        <li>✅ Add a subtle drop shadow or background to make it pop</li>
+        <li>✅ Consider adding annotations or arrows to highlight features</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
+

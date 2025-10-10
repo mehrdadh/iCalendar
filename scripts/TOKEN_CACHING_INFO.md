@@ -78,7 +78,8 @@
 
 ## 🔒 Security Features
 
-✅ **Tokens stored in memory only** - Not persisted to disk  
+✅ **Tokens stored in chrome.storage.local** - Encrypted and sandboxed by Chrome  
+✅ **Persists across service worker restarts** - No repeated auth prompts  
 ✅ **Tokens expire automatically** - Google's default expiration  
 ✅ **Auto re-authentication** - Seamless when needed  
 ✅ **Permission validation** - Re-authenticates if permissions change  
@@ -87,16 +88,17 @@
 ## 💾 Where Is Token Stored?
 
 ```javascript
-// In background.js (service worker memory)
-let cachedAccessToken = null;      // The actual token
-let tokenExpiryTime = null;        // When it expires
+// In chrome.storage.local (persistent storage)
+// - cachedAccessToken: The actual token
+// - tokenExpiryTime: When it expires (timestamp)
 ```
 
 **Important:** 
-- Tokens are stored in the service worker's memory
-- If you reload the extension, tokens are cleared
-- If the service worker is terminated by Chrome, tokens are lost
-- This is intentional for security!
+- Tokens are stored in `chrome.storage.local` for persistence
+- Storage is encrypted and sandboxed by Chrome
+- Tokens persist even when service worker is terminated
+- If you reload/reinstall the extension, tokens are cleared
+- Tokens automatically expire after ~1 hour per Google's policy
 
 ## 🎯 User Experience
 
