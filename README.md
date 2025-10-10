@@ -152,6 +152,10 @@ The extension extracts and creates events with the following information from yo
 - You can revoke access anytime in your [Google Account settings](https://myaccount.google.com/permissions)
 - Event caching is disabled by default (no data persists after popup closes)
 
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
 ## License
 
-Free to use and modify.
+See the [LICENSE](LICENSE) file for details.
