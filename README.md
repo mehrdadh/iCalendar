@@ -11,7 +11,8 @@ A Chrome extension that reads .ics calendar files and creates Google Calendar ev
 - 🖱️ **Click to browse** - Alternative file selection method
 - ✅ **Instant feedback** - Success/error messages with smooth animations
 - 🔄 **Auto-clear** - Event data clears after successful creation
-- 🔐 **Secure OAuth** - First-time authentication, then cached tokens
+- 🔐 **Secure OAuth** - First-time authentication, then cached tokens (persistent storage)
+- 💾 **Smart token caching** - No repeated auth prompts (survives service worker restarts)
 - 📏 **Compact design** - Optimized spacing and font sizes
 - 🎯 **ICS standard compliant** - Proper handling of escape sequences and line folding
 
@@ -31,7 +32,7 @@ No hard-coded credentials required! Each user brings their own OAuth credentials
 
 ### Step 3: Set Up Your Google OAuth (5 minutes)
 
-See [USER_SETUP_GUIDE.md](USER_SETUP_GUIDE.md) for detailed instructions.
+See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructions.
 
 **Quick steps:**
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
@@ -63,14 +64,27 @@ See [USER_SETUP_GUIDE.md](USER_SETUP_GUIDE.md) for detailed instructions.
 
 ```
 chrome_extension/
-├── manifest.json          # Extension configuration with OAuth2 scopes
-├── popup.html             # Extension popup UI
-├── popup.js               # ICS parsing, UI logic, and event creation
-├── background.js          # OAuth authentication and Google Calendar API calls
-├── styles.css             # Modern purple gradient theme styling
-├── README.md              # This file
-├── USER_SETUP_GUIDE.md    # Step-by-step OAuth setup guide
-└── TOKEN_CACHING_INFO.md  # Token caching behavior documentation
+├── manifest.json                      # Extension configuration with OAuth2 scopes
+├── popup.html                         # Extension popup UI
+├── popup.js                           # ICS parsing, UI logic, and event creation
+├── background.js                      # OAuth authentication and Google Calendar API calls
+├── styles.css                         # Modern purple gradient theme styling
+├── README.md                          # This file
+├── CONTRIBUTING.md                    # Contribution guidelines
+├── LICENSE                            # License information
+│
+├── docs/
+│   └── privacy-policy.html            # Privacy policy (HTML for web hosting)
+│
+├── scripts/
+│   ├── USER_SETUP_GUIDE.md            # Step-by-step OAuth setup guide
+│   ├── TOKEN_CACHING_INFO.md          # Token caching behavior documentation
+│   ├── SETUP.md                       # Additional setup information
+│   ├── TROUBLESHOOTING.md             # Troubleshooting guide
+│   ├── build_release.sh               # Build script for releases
+│   └── test_storage.html              # Storage testing utility
+|
+└── releases/                          # Packaged extension releases
 ```
 
 ## How It Works
@@ -84,7 +98,10 @@ chrome_extension/
    - Extracts key event data
 5. **Smart Display**: Shows only essential info (event title as heading, start/end times, location)
 6. **Calendar Selection**: Choose which Google Calendar to add the event to
-7. **Token Caching**: OAuth tokens are cached with 5-minute expiry buffer for smooth UX
+7. **Token Caching**: OAuth tokens are cached in persistent storage (survives service worker restarts)
+   - Tokens stored in encrypted `chrome.storage.local`
+   - 5-minute expiry buffer for smooth UX
+   - Prevents repeated authentication prompts
 8. **Event Creation**: Converts ICS data to Google Calendar API format and creates the event
 9. **Auto-Clear**: Success message shows for 2 seconds, then fades out with event data cleared
 
@@ -145,12 +162,14 @@ The extension extracts and creates events with the following information from yo
 
 - Files are processed locally in your browser
 - No data is sent to any server except Google Calendar API
-- OAuth tokens are cached locally with expiry management
+- OAuth tokens are cached in encrypted Chrome storage (persists across service worker restarts)
+- Tokens automatically expire after 1 hour
 - The extension requests two permissions:
   - `calendar.events` - Create calendar events
   - `calendar.readonly` - Read your calendar list
 - You can revoke access anytime in your [Google Account settings](https://myaccount.google.com/permissions)
 - Event caching is disabled by default (no data persists after popup closes)
+- **Full privacy policy:** See [PRIVACY_POLICY.md](./PRIVACY_POLICY.md) for complete details
 
 ## Contributing
 
