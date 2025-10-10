@@ -134,8 +134,8 @@ The extension extracts and creates events with the following information from yo
 - Reload the extension and reauthorize
 
 **OAuth/Authentication errors**
-- See [USER_SETUP_GUIDE.md](USER_SETUP_GUIDE.md) for setup instructions
-- See [TOKEN_CACHING_INFO.md](TOKEN_CACHING_INFO.md) for token behavior
+- See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for setup instructions
+- See [TOKEN_CACHING_INFO.md](./scripts/TOKEN_CACHING_INFO.md) for token behavior
 
 **Event not persisting after closing popup**
 - This is expected behavior with `ENABLE_EVENT_CACHING = false`
