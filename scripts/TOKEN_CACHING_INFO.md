@@ -18,9 +18,10 @@
 ### When Token Expires:
 1. Tokens expire after ~1 hour (Google default)
 2. Extension detects expired token
-3. **Automatically re-authenticates** in background
-4. Event is created
-5. New token is cached
+3. **Silently re-authenticates** in background (no popup!)
+4. If silent auth succeeds, event is created immediately
+5. If silent auth fails, interactive popup appears
+6. New token is cached
 
 ### When Permissions Are Insufficient:
 1. If API returns 401 (unauthorized) or 403 (forbidden)
@@ -37,19 +38,20 @@
               │
               ▼
       ┌───────────────┐
-      │ Have cached   │ NO ──→ Authenticate ──→ Cache token
-      │ token?        │                              │
-      └───────┬───────┘                              │
-              │ YES                                  │
-              ▼                                      │
-      ┌───────────────┐                             │
-      │ Is token      │ NO ──→ Re-authenticate ─────┤
-      │ still valid?  │                              │
-      └───────┬───────┘                              │
-              │ YES                                  │
-              ▼                                      │
-      ┌───────────────┐                             │
-      │ Use cached    │◄─────────────────────────────┘
+      │ Have cached   │ NO ──→ Try silent auth ──→ Success ──→ Cache token
+      │ token?        │              │                             │
+      └───────┬───────┘              │ Fail                        │
+              │ YES                  ▼                             │
+              ▼                Interactive auth ──────────────────┘
+      ┌───────────────┐                                            │
+      │ Is token      │ NO ──→ Try silent auth ──→ Success ────────┤
+      │ still valid?  │              │                             │
+      └───────┬───────┘              │ Fail                        │
+              │ YES                  ▼                             │
+              │            Interactive auth ──────────────────────┘
+              ▼                                                     │
+      ┌───────────────┐                                            │
+      │ Use cached    │◄───────────────────────────────────────────┘
       │ token         │
       └───────┬───────┘
               │
@@ -60,7 +62,7 @@
               │
               ▼
     ┌─────────────────┐
-    │ 401/403 error?  │ YES ──→ Re-authenticate (once)
+    │ 401/403 error?  │ YES ──→ Try silent auth ──→ Re-authenticate if needed
     └─────────┬───────┘
               │ NO
               ▼
@@ -76,12 +78,29 @@
 - **Effective lifetime**: ~55 minutes
 - **Auto-refresh**: Automatic on next use
 
+## 🤫 Silent Authentication (NEW!)
+
+When your token expires, the extension now uses **silent authentication** to get a new token without showing you the account selection screen!
+
+### How It Works:
+1. Token expires after ~1 hour
+2. Extension tries **silent authentication** first (using `prompt=none`)
+3. Google checks: "Is user still signed in? Did they already grant consent?"
+4. If YES → New token issued silently (no popup!)
+5. If NO → Only then show interactive popup
+
+### Benefits:
+- ✅ No annoying "Select your account" popup every hour
+- ✅ Seamless token refresh in the background
+- ✅ Only shows popup when truly necessary
+- ✅ Much better user experience!
+
 ## 🔒 Security Features
 
 ✅ **Tokens stored in chrome.storage.local** - Encrypted and sandboxed by Chrome  
 ✅ **Persists across service worker restarts** - No repeated auth prompts  
 ✅ **Tokens expire automatically** - Google's default expiration  
-✅ **Auto re-authentication** - Seamless when needed  
+✅ **Silent re-authentication** - No popup when token expires (if still signed in)  
 ✅ **Permission validation** - Re-authenticates if permissions change  
 ✅ **Service worker context** - Isolated from webpage  
 

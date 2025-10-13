@@ -98,10 +98,11 @@ chrome_extension/
    - Extracts key event data
 5. **Smart Display**: Shows only essential info (event title as heading, start/end times, location)
 6. **Calendar Selection**: Choose which Google Calendar to add the event to
-7. **Token Caching**: OAuth tokens are cached in persistent storage (survives service worker restarts)
+7. **Smart Authentication**: OAuth tokens are cached in persistent storage with silent refresh
    - Tokens stored in encrypted `chrome.storage.local`
    - 5-minute expiry buffer for smooth UX
-   - Prevents repeated authentication prompts
+   - Silent authentication (no popup!) when token expires
+   - Interactive popup only shown when absolutely necessary
 8. **Event Creation**: Converts ICS data to Google Calendar API format and creates the event
 9. **Auto-Clear**: Success message shows for 2 seconds, then fades out with event data cleared
 

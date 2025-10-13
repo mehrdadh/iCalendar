@@ -125,6 +125,28 @@ async function isTokenValid() {
   return true;
 }
 
+// Get user's email from Google (for login_hint)
+async function getUserEmail(accessToken) {
+  try {
+    const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+    
+    if (!response.ok) {
+      console.log('Failed to get user info:', response.status);
+      return null;
+    }
+    
+    const data = await response.json();
+    return data.email || null;
+  } catch (error) {
+    console.error('Error fetching user email:', error);
+    return null;
+  }
+}
+
 // Get access token (from cache or by authenticating)
 async function getAccessToken(clientId, forceAuth = false, sendStatus = null) {
   // If forcing authentication, clear cache
@@ -141,10 +163,34 @@ async function getAccessToken(clientId, forceAuth = false, sendStatus = null) {
   }
   
   // Need to authenticate
-  console.log('Authenticating with OAuth 2.0...');
+  // First try silent authentication (non-interactive) if not forcing
+  if (!forceAuth) {
+    console.log('Attempting silent authentication...');
+    try {
+      const tokenData = await authenticateWithOAuth2(clientId, false); // false = non-interactive
+      
+      // Cache the token in storage (persists across service worker restarts)
+      const expiryTime = Date.now() + (tokenData.expiresIn * 1000);
+      await chrome.storage.local.set({
+        cachedAccessToken: tokenData.accessToken,
+        tokenExpiryTime: expiryTime
+      });
+      
+      console.log('✓ Silent authentication successful, token cached');
+      return tokenData.accessToken;
+    } catch (error) {
+      // Silent auth failed - this is expected when user needs to interact
+      console.log('⚠ Silent authentication failed (expected):', error.message);
+      console.log('→ Falling back to interactive authentication...');
+      // Fall through to interactive authentication below
+    }
+  }
+  
+  // Silent auth failed or forceAuth was requested - use interactive authentication
+  console.log('Authenticating with OAuth 2.0 (interactive)...');
   if (sendStatus) sendStatus('Authenticating...');
   
-  const tokenData = await authenticateWithOAuth2(clientId);
+  const tokenData = await authenticateWithOAuth2(clientId, true); // true = interactive
   
   // Cache the token in storage (persists across service worker restarts)
   const expiryTime = Date.now() + (tokenData.expiresIn * 1000);
@@ -154,11 +200,24 @@ async function getAccessToken(clientId, forceAuth = false, sendStatus = null) {
   });
   
   console.log('Token cached to storage, expires in', tokenData.expiresIn, 'seconds');
+  
+  // Try to get and store user email for future login_hint (helps avoid account selection)
+  try {
+    const userEmail = await getUserEmail(tokenData.accessToken);
+    if (userEmail) {
+      await chrome.storage.local.set({ userEmail: userEmail });
+      console.log('Stored user email for login_hint:', userEmail);
+    }
+  } catch (error) {
+    console.log('Could not fetch user email (non-critical):', error.message);
+  }
+  
   return tokenData.accessToken;
 }
 
 // OAuth 2.0 authentication using web flow
-async function authenticateWithOAuth2(clientId) {
+// interactive: true = show UI, false = silent (prompt=none)
+async function authenticateWithOAuth2(clientId, interactive = true) {
   const redirectUri = chrome.identity.getRedirectURL();
   console.log('Redirect URI:', redirectUri);
   
@@ -166,8 +225,23 @@ async function authenticateWithOAuth2(clientId) {
   authUrl.searchParams.set('client_id', clientId);
   authUrl.searchParams.set('response_type', 'token');
   authUrl.searchParams.set('redirect_uri', redirectUri);
-  authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly');
-  // Remove 'prompt=consent' to allow token reuse
+  authUrl.searchParams.set('scope', 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/userinfo.email');
+  
+  // Try to get stored user email to help with auth (reduces account selection prompts)
+  const stored = await chrome.storage.local.get(['userEmail']);
+  if (stored.userEmail) {
+    authUrl.searchParams.set('login_hint', stored.userEmail);
+    console.log('Using login_hint:', stored.userEmail);
+  }
+  
+  // For non-interactive (silent) authentication, use prompt=none
+  // This will silently get a new token if the user is signed in and has already granted consent
+  if (!interactive) {
+    authUrl.searchParams.set('prompt', 'none');
+    console.log('Silent authentication mode');
+  } else {
+    console.log('Interactive authentication mode');
+  }
   
   console.log('Auth URL:', authUrl.toString());
   
@@ -175,27 +249,50 @@ async function authenticateWithOAuth2(clientId) {
     chrome.identity.launchWebAuthFlow(
       {
         url: authUrl.toString(),
-        interactive: true
+        interactive: interactive
       },
       (redirectUrl) => {
         if (chrome.runtime.lastError) {
-          console.error('Auth error:', chrome.runtime.lastError);
-          reject(new Error(chrome.runtime.lastError.message));
+          const errorMsg = chrome.runtime.lastError.message;
+          if (!interactive) {
+            // For silent auth, this is expected when user needs to interact
+            console.log('Silent auth failed (Chrome error):', errorMsg);
+          } else {
+            console.error('Interactive auth error:', errorMsg);
+          }
+          reject(new Error(errorMsg));
           return;
         }
         
         if (!redirectUrl) {
-          reject(new Error('No redirect URL received'));
+          const errorMsg = 'No redirect URL received';
+          console.error(errorMsg);
+          reject(new Error(errorMsg));
           return;
         }
         
-        console.log('Redirect URL:', redirectUrl);
+        console.log('Redirect URL received:', redirectUrl.substring(0, 100) + '...');
         
         // Extract access token and expiry from URL fragment
         try {
           const url = new URL(redirectUrl);
           const fragment = url.hash.substring(1); // Remove #
           const params = new URLSearchParams(fragment);
+          
+          // Check for errors (especially important for silent auth)
+          const error = params.get('error');
+          if (error) {
+            const errorDesc = params.get('error_description') || error;
+            if (!interactive) {
+              // For silent auth, these errors are expected
+              console.log('Silent auth OAuth error:', error, '-', errorDesc);
+            } else {
+              console.error('Interactive auth OAuth error:', error, '-', errorDesc);
+            }
+            reject(new Error(`OAuth error: ${error} - ${errorDesc}`));
+            return;
+          }
+          
           const accessToken = params.get('access_token');
           const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
           
