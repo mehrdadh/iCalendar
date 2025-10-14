@@ -1,3 +1,7 @@
 .DS_Store
 
 releases/
+
+# Private key for extension (NEVER commit this!)
+key.pem
+*.pem
