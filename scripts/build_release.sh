@@ -34,6 +34,9 @@ FILES_TO_INCLUDE=(
     "background.js"
     "styles.css"
     "images/logo.png"
+    "images/logo_16x16.png"
+    "images/logo_48x48.png"
+    "images/logo_128x128.png"
 )
 
 # Define documentation files (optional - can be excluded for store submission)
