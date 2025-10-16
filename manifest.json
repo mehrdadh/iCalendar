@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "iCalendar",
     "version": "1.0.0",
-    "description": "Import iCalendar (.ics) files to Google Calendar with simple drag and drop.",
+    "description": "Import iCalendar files to Google Calendar with simple drag and drop.",
     "icons": {
         "16": "images/logo_16x16.png",
         "48": "images/logo_48x48.png",
