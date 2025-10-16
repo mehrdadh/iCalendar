@@ -282,6 +282,13 @@ body:has(.file-info.hidden) {
   font-weight: 600;
 }
 
+.drop-zone h3 {
+  color: white;
+  font-size: 13px;
+  margin: 0;
+  font-weight: 600;
+}
+
 .drop-zone p {
   color: rgba(255, 255, 255, 0.8);
   font-size: 12px;
