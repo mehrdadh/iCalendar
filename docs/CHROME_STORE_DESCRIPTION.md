@@ -1,8 +1,9 @@
-Tired of manually copying event details from iCalendar files into Google Calendar? iCalendar makes it instant! Simply drag and drop any .ics calendar file, and add it to your Google Calendar with one click.
+Tired of manually copying event details from calendar files into Google Calendar? iCalendar makes it instant! Simply drag and drop any calendar file, and add it to your Google Calendar with one click.
 
 Key Features ✨
 
-* Drag & Drop Simplicity: Just drop your .ics file onto the extension
+* Drag & Drop Simplicity: Just drop your .ics or .vcs file onto the extension
+* Multi-Format Support: Works with both iCalendar (.ics) and vCalendar (.vcs) formats
 * Multi-Calendar Support: Choose which Google Calendar to add events to
 * Smart Event Parsing: Automatically extracts all event details (title, time, location, description)
 * One-Click Import: No manual data entry required
@@ -13,7 +14,7 @@ Key Features ✨
 How It Works 🚀
 
 1. Click the extension icon
-2. Drag and drop an .ics file (or click to browse)
+2. Drag and drop an .ics or .vcs file (or click to browse)
 3. Review the event details
 4. Select which calendar to add it to
 5. Click "Add to Calendar"
@@ -25,7 +26,7 @@ Perfect For 📋
 * Event files from conference registrations
 * Exported calendar events from other services
 * Travel itineraries and reservations
-* Any .ics calendar file
+* Any .ics or .vcs calendar file
 
 Privacy & Security 🔒
 

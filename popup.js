@@ -293,14 +293,15 @@ function handleFiles(files) {
   
   const file = files[0];
   
-  // Check if file has .ics extension
-  if (!file.name.toLowerCase().endsWith('.ics')) {
-    showError('Unsupported file type. Please upload an .ics file.');
+  // Check if file has .ics or .vcs extension
+  const fileName = file.name.toLowerCase();
+  if (!fileName.endsWith('.ics') && !fileName.endsWith('.vcs')) {
+    showError('Unsupported file type. Please upload an .ics or .vcs file.');
     return;
   }
   
-  // Read and parse the .ics file
-  readICSFile(file);
+  // Read and parse the calendar file
+  readCalendarFile(file);
 }
 
 function showError(message) {
@@ -308,13 +309,13 @@ function showError(message) {
   errorMessage.classList.remove('hidden');
 }
 
-function readICSFile(file) {
+function readCalendarFile(file) {
   const reader = new FileReader();
   
   reader.onload = function(e) {
     const content = e.target.result;
-    const icsData = parseICS(content);
-    displayICSAttributes(file.name, icsData);
+    const calendarData = parseCalendarFile(content);
+    displayICSAttributes(file.name, calendarData);
   };
   
   reader.onerror = function() {
@@ -324,13 +325,27 @@ function readICSFile(file) {
   reader.readAsText(file);
 }
 
-function parseICS(content) {
-  // First, unfold lines (ICS spec: lines starting with space/tab are continuations)
+function parseCalendarFile(content) {
+  // First, unfold lines (both ICS and VCS spec: lines starting with space/tab are continuations)
   const unfoldedContent = content.replace(/\r\n /g, '').replace(/\n /g, '').replace(/\r /g, '');
   
   const lines = unfoldedContent.split(/\r\n|\n|\r/);
   const attributes = {};
   let inEvent = false;
+  let isVCS = false;
+  
+  // Detect if this is a VCS (vCalendar 1.0) or ICS (iCalendar 2.0) file
+  for (const line of lines) {
+    if (line.trim().startsWith('VERSION:1.0')) {
+      isVCS = true;
+      console.log('Detected VCS (vCalendar 1.0) format');
+      break;
+    } else if (line.trim().startsWith('VERSION:2.0')) {
+      isVCS = false;
+      console.log('Detected ICS (iCalendar 2.0) format');
+      break;
+    }
+  }
   
   lines.forEach(line => {
     line = line.trim();
@@ -357,18 +372,28 @@ function parseICS(content) {
       const semicolonIndex = key.indexOf(';');
       const cleanKey = semicolonIndex > 0 ? key.substring(0, semicolonIndex) : key;
       
-      // Decode ICS escape sequences
-      // Per RFC 5545: \n = newline, \, = comma, \; = semicolon, \\ = backslash
+      // Decode escape sequences
+      // Both ICS and VCS use similar escaping: \n = newline, \, = comma, \; = semicolon, \\ = backslash
       value = value.replace(/\\n/g, '\n');
       value = value.replace(/\\,/g, ',');
       value = value.replace(/\\;/g, ';');
       value = value.replace(/\\\\/g, '\\');
       
-      // Store the attribute
-      if (!attributes[cleanKey]) {
-        attributes[cleanKey] = [];
+      // Handle VCS-specific fields (convert to ICS equivalents)
+      let mappedKey = cleanKey;
+      if (isVCS) {
+        // VCS uses AALARM, we'll convert it to a recognizable format
+        // but we don't need to do much with it since Google Calendar API doesn't use this
+        if (cleanKey === 'AALARM') {
+          mappedKey = 'AALARM'; // Keep as is for now
+        }
       }
-      attributes[cleanKey].push(value);
+      
+      // Store the attribute
+      if (!attributes[mappedKey]) {
+        attributes[mappedKey] = [];
+      }
+      attributes[mappedKey].push(value);
     }
   });
   
@@ -698,7 +723,7 @@ function parseICSDateTime(icsDateTime) {
 dropZone.addEventListener('click', () => {
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.ics';
+  input.accept = '.ics,.vcs';
   input.multiple = false;
   
   input.addEventListener('change', (e) => {

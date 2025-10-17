@@ -1,10 +1,10 @@
-# ICS File Importer Chrome Extension
+# iCalendar File Importer Chrome Extension
 
-A Chrome extension that reads .ics calendar files and creates Google Calendar events from them with a beautiful, modern interface.
+A Chrome extension that reads .ics and .vcs calendar files and creates Google Calendar events from them with a beautiful, modern interface.
 
 ## Features
 
-- 📁 **Drag and drop** .ics files onto the extension popup
+- 📁 **Drag and drop** .ics or .vcs files onto the extension popup
 - 📝 **Smart parsing** - Displays key event details (title, time, location)
 - 📅 **Multi-calendar support** - Choose which Google Calendar to add events to
 - 🎨 **Modern, gradient UI** - Purple gradient theme with clean design
@@ -14,7 +14,7 @@ A Chrome extension that reads .ics calendar files and creates Google Calendar ev
 - 🔐 **Secure OAuth** - First-time authentication, then cached tokens (persistent storage)
 - 💾 **Smart token caching** - No repeated auth prompts (survives service worker restarts)
 - 📏 **Compact design** - Optimized spacing and font sizes
-- 🎯 **ICS standard compliant** - Proper handling of escape sequences and line folding
+- 🎯 **ICS & VCS standard compliant** - Supports both iCalendar 2.0 (.ics) and vCalendar 1.0 (.vcs) formats with proper handling of escape sequences and line folding
 
 ## Installation
 
@@ -54,7 +54,7 @@ See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructio
 1. Click the extension icon - **You'll be prompted to authorize on first use**
 2. Sign in with Google and grant calendar permissions
 3. Your calendars will load automatically
-4. Drag and drop an `.ics` file (or click to browse)
+4. Drag and drop an `.ics` or `.vcs` file (or click to browse)
 5. Review the event details (title, time, location)
 6. Select which calendar to add the event to
 7. Click **"Add to Calendar"**
@@ -91,9 +91,10 @@ chrome_extension/
 
 1. **First-Time Setup**: On first use, you'll be prompted to authorize with Google Calendar
 2. **Calendar Loading**: Your Google Calendars load automatically and are cached for quick access
-3. **File Validation**: Drag and drop validates `.ics` file extension
-4. **ICS Parsing**: 
-   - Handles line folding per RFC 5545
+3. **File Validation**: Drag and drop validates `.ics` or `.vcs` file extension
+4. **Calendar File Parsing**: 
+   - Auto-detects iCalendar 2.0 (.ics) or vCalendar 1.0 (.vcs) format
+   - Handles line folding per RFC 5545 and vCalendar specs
    - Decodes escape sequences (`\n` → newlines, etc.)
    - Extracts key event data
 5. **Smart Display**: Shows only essential info (event title as heading, start/end times, location)
@@ -103,7 +104,7 @@ chrome_extension/
    - 5-minute expiry buffer for smooth UX
    - Silent authentication (no popup!) when token expires
    - Interactive popup only shown when absolutely necessary
-8. **Event Creation**: Converts ICS data to Google Calendar API format and creates the event
+8. **Event Creation**: Converts calendar data to Google Calendar API format and creates the event
 9. **Auto-Clear**: Success message shows for 2 seconds, then fades out with event data cleared
 
 ### Feature Flags
@@ -136,8 +137,8 @@ The extension extracts and creates events with the following information from yo
 ## Troubleshooting
 
 **"Unsupported file type" error**
-- Make sure your file has the `.ics` extension
-- Verify the file is a valid ICS calendar file
+- Make sure your file has the `.ics` or `.vcs` extension
+- Verify the file is a valid iCalendar or vCalendar file
 
 **"Failed to create event" error**
 - Check that you've completed the Google Calendar API setup
