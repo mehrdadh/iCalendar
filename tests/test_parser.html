@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICS/VCS Parser Tests</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4285f4;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #555;
+      margin-top: 30px;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #ccc;
+    }
+    .test-result.pass {
+      background-color: #e8f5e9;
+      border-left-color: #4caf50;
+    }
+    .test-result.fail {
+      background-color: #ffebee;
+      border-left-color: #f44336;
+    }
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .test-details {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    .summary {
+      background: #4285f4;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 30px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .code-block {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    button {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #3367d6;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 ICS/VCS Parser Test Suite</h1>
+  <div>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <button onclick="clearResults()">Clear Results</button>
+  </div>
+  <div id="results"></div>
+
+  <script>
+    // ===== PARSING FUNCTIONS FROM popup.js =====
+    
+    function parseCalendarFile(content) {
+      // First, unfold lines (both ICS and VCS spec: lines starting with space/tab are continuations)
+      const unfoldedContent = content.replace(/\r\n /g, '').replace(/\n /g, '').replace(/\r /g, '');
+      
+      const lines = unfoldedContent.split(/\r\n|\n|\r/);
+      const attributes = {};
+      let inEvent = false;
+      let isVCS = false;
+      
+      // Detect if this is a VCS (vCalendar 1.0) or ICS (iCalendar 2.0) file
+      for (const line of lines) {
+        if (line.trim().startsWith('VERSION:1.0')) {
+          isVCS = true;
+          console.log('Detected VCS (vCalendar 1.0) format');
+          break;
+        } else if (line.trim().startsWith('VERSION:2.0')) {
+          isVCS = false;
+          console.log('Detected ICS (iCalendar 2.0) format');
+          break;
+        }
+      }
+      
+      lines.forEach(line => {
+        line = line.trim();
+        
+        if (line === 'BEGIN:VEVENT') {
+          inEvent = true;
+          return;
+        }
+        
+        if (line === 'END:VEVENT') {
+          inEvent = false;
+          return;
+        }
+        
+        if (!inEvent) return;
+        
+        // Parse key-value pairs
+        const colonIndex = line.indexOf(':');
+        if (colonIndex > 0) {
+          const key = line.substring(0, colonIndex);
+          let value = line.substring(colonIndex + 1);
+          
+          // Handle special keys with parameters (e.g., DTSTART;TZID=...)
+          const semicolonIndex = key.indexOf(';');
+          const cleanKey = semicolonIndex > 0 ? key.substring(0, semicolonIndex) : key;
+          
+          // Decode escape sequences
+          value = value.replace(/\\n/g, '\n');
+          value = value.replace(/\\,/g, ',');
+          value = value.replace(/\\;/g, ';');
+          value = value.replace(/\\\\/g, '\\');
+          
+          // Handle VCS-specific fields
+          let mappedKey = cleanKey;
+          if (isVCS) {
+            if (cleanKey === 'AALARM') {
+              mappedKey = 'AALARM';
+            }
+          }
+          
+          // Store the attribute
+          if (!attributes[mappedKey]) {
+            attributes[mappedKey] = [];
+          }
+          attributes[mappedKey].push(value);
+        }
+      });
+      
+      return attributes;
+    }
+
+    function convertICSToGoogleCalendarEvent(icsData) {
+      const event = {
+        summary: getFirstValue(icsData, 'SUMMARY') || 'Untitled Event',
+        description: getFirstValue(icsData, 'DESCRIPTION') || '',
+        location: getFirstValue(icsData, 'LOCATION') || '',
+      };
+      
+      // Handle start time
+      const dtstart = getFirstValue(icsData, 'DTSTART');
+      if (dtstart) {
+        event.start = parseICSDateTime(dtstart);
+      }
+      
+      // Handle end time
+      const dtend = getFirstValue(icsData, 'DTEND');
+      if (dtend) {
+        event.end = parseICSDateTime(dtend);
+      }
+      
+      // Handle recurrence rules if present
+      const rrule = getFirstValue(icsData, 'RRULE');
+      if (rrule) {
+        event.recurrence = [`RRULE:${rrule}`];
+      }
+      
+      // Handle attendees
+      const attendees = icsData['ATTENDEE'];
+      if (attendees && attendees.length > 0) {
+        event.attendees = attendees.map(attendee => {
+          const emailMatch = attendee.match(/mailto:([^\s]+)/i);
+          if (emailMatch) {
+            return { email: emailMatch[1] };
+          }
+          return null;
+        }).filter(a => a !== null);
+      }
+      
+      return event;
+    }
+
+    function getFirstValue(data, key) {
+      return data[key] && data[key].length > 0 ? data[key][0] : null;
+    }
+
+    function parseICSDateTime(icsDateTime) {
+      if (!icsDateTime) return null;
+      
+      // Remove any timezone info for simplicity
+      icsDateTime = icsDateTime.replace(/;.*$/, '');
+      
+      if (icsDateTime.length === 8) {
+        // Date only: YYYYMMDD
+        const year = icsDateTime.substring(0, 4);
+        const month = icsDateTime.substring(4, 6);
+        const day = icsDateTime.substring(6, 8);
+        return { date: `${year}-${month}-${day}` };
+      } else if (icsDateTime.length >= 15) {
+        // DateTime: YYYYMMDDTHHMMSS or YYYYMMDDTHHMMSSZ
+        const year = icsDateTime.substring(0, 4);
+        const month = icsDateTime.substring(4, 6);
+        const day = icsDateTime.substring(6, 8);
+        const hour = icsDateTime.substring(9, 11);
+        const minute = icsDateTime.substring(11, 13);
+        const second = icsDateTime.substring(13, 15);
+        
+        // Check if it's UTC (ends with Z)
+        if (icsDateTime.endsWith('Z')) {
+          return { 
+            dateTime: `${year}-${month}-${day}T${hour}:${minute}:${second}Z`,
+            timeZone: 'UTC'
+          };
+        } else {
+          return { 
+            dateTime: `${year}-${month}-${day}T${hour}:${minute}:${second}`,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          };
+        }
+      }
+      
+      return null;
+    }
+
+    // ===== TEST FRAMEWORK =====
+    
+    let testResults = [];
+
+    function assert(condition, testName, expected, actual) {
+      const passed = condition;
+      testResults.push({
+        passed,
+        testName,
+        expected,
+        actual
+      });
+      return passed;
+    }
+
+    function assertEquals(expected, actual, testName) {
+      const passed = JSON.stringify(expected) === JSON.stringify(actual);
+      testResults.push({
+        passed,
+        testName,
+        expected: JSON.stringify(expected, null, 2),
+        actual: JSON.stringify(actual, null, 2)
+      });
+      return passed;
+    }
+
+    function displayResults() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      
+      const passed = testResults.filter(r => r.passed).length;
+      const total = testResults.length;
+      
+      testResults.forEach(result => {
+        const testDiv = document.createElement('div');
+        testDiv.className = `test-result ${result.passed ? 'pass' : 'fail'}`;
+        
+        const testName = document.createElement('div');
+        testName.className = 'test-name';
+        testName.textContent = `${result.passed ? '✅' : '❌'} ${result.testName}`;
+        testDiv.appendChild(testName);
+        
+        if (!result.passed) {
+          const details = document.createElement('div');
+          details.className = 'test-details';
+          details.innerHTML = `
+            <div><strong>Expected:</strong></div>
+            <div class="code-block">${escapeHtml(result.expected)}</div>
+            <div><strong>Actual:</strong></div>
+            <div class="code-block">${escapeHtml(result.actual)}</div>
+          `;
+          testDiv.appendChild(details);
+        }
+        
+        resultsDiv.appendChild(testDiv);
+      });
+      
+      const summary = document.createElement('div');
+      summary.className = 'summary';
+      summary.textContent = `Test Results: ${passed}/${total} passed (${((passed/total)*100).toFixed(1)}%)`;
+      resultsDiv.appendChild(summary);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function clearResults() {
+      testResults = [];
+      document.getElementById('results').innerHTML = '';
+    }
+
+    // ===== TEST CASES =====
+
+    async function runAllTests() {
+      clearResults();
+      
+      const section1 = addSection('Test Single Event ICS File');
+      await testSingleICS();
+      
+      const section2 = addSection('Test Single Event VCS File');
+      await testSingleVCS();
+      
+      const section3 = addSection('Test Multiple Events ICS File');
+      await testMultipleICS();
+      
+      const section4 = addSection('Test Multiple Events VCS File');
+      await testMultipleVCS();
+      
+      const section5 = addSection('Test DateTime Parsing');
+      testDateTimeParsing();
+      
+      displayResults();
+    }
+
+    function addSection(title) {
+      const resultsDiv = document.getElementById('results');
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = `<h2>${title}</h2>`;
+      resultsDiv.appendChild(section);
+      return section;
+    }
+
+    async function testSingleICS() {
+      const fileContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//iCalendar Extension//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Test Calendar
+X-WR-TIMEZONE:America/Los_Angeles
+
+BEGIN:VEVENT
+UID:test-single-event@example.com
+DTSTAMP:20251017T180000Z
+DTSTART:20251018T140000Z
+DTEND:20251018T150000Z
+SUMMARY:Test Event
+DESCRIPTION:This is a simple test event for testing purposes.
+LOCATION:Test Location
+STATUS:CONFIRMED
+SEQUENCE:0
+CREATED:20251017T180000Z
+LAST-MODIFIED:20251017T180000Z
+END:VEVENT
+
+END:VCALENDAR`;
+
+      const parsed = parseCalendarFile(fileContent);
+      
+      // Test parsing
+      assert(parsed.SUMMARY && parsed.SUMMARY[0] === 'Test Event', 
+        'ICS Single: Parse SUMMARY', 'Test Event', parsed.SUMMARY ? parsed.SUMMARY[0] : 'null');
+      
+      assert(parsed.DESCRIPTION && parsed.DESCRIPTION[0] === 'This is a simple test event for testing purposes.',
+        'ICS Single: Parse DESCRIPTION', 'This is a simple test event for testing purposes.', 
+        parsed.DESCRIPTION ? parsed.DESCRIPTION[0] : 'null');
+      
+      assert(parsed.LOCATION && parsed.LOCATION[0] === 'Test Location',
+        'ICS Single: Parse LOCATION', 'Test Location', parsed.LOCATION ? parsed.LOCATION[0] : 'null');
+      
+      assert(parsed.DTSTART && parsed.DTSTART[0] === '20251018T140000Z',
+        'ICS Single: Parse DTSTART', '20251018T140000Z', parsed.DTSTART ? parsed.DTSTART[0] : 'null');
+      
+      // Test conversion to Google Calendar format
+      const googleEvent = convertICSToGoogleCalendarEvent(parsed);
+      
+      assertEquals(
+        { summary: 'Test Event' },
+        { summary: googleEvent.summary },
+        'ICS Single: Google Calendar summary'
+      );
+      
+      assertEquals(
+        { description: 'This is a simple test event for testing purposes.' },
+        { description: googleEvent.description },
+        'ICS Single: Google Calendar description'
+      );
+      
+      assertEquals(
+        { location: 'Test Location' },
+        { location: googleEvent.location },
+        'ICS Single: Google Calendar location'
+      );
+      
+      assertEquals(
+        { dateTime: '2025-10-18T14:00:00Z', timeZone: 'UTC' },
+        googleEvent.start,
+        'ICS Single: Google Calendar start time'
+      );
+      
+      assertEquals(
+        { dateTime: '2025-10-18T15:00:00Z', timeZone: 'UTC' },
+        googleEvent.end,
+        'ICS Single: Google Calendar end time'
+      );
+    }
+
+    async function testSingleVCS() {
+      const fileContent = `BEGIN:VCALENDAR
+VERSION:1.0
+PRODID:-//iCalendar Extension//EN
+
+BEGIN:VEVENT
+UID:test-single-event@example.com
+DTSTART:20251018T140000Z
+DTEND:20251018T150000Z
+SUMMARY:Test Event
+DESCRIPTION:This is a simple test event for testing purposes.
+LOCATION:Test Location
+STATUS:CONFIRMED
+DCREATED:20251017T180000Z
+LAST-MODIFIED:20251017T180000Z
+END:VEVENT
+
+END:VCALENDAR`;
+
+      const parsed = parseCalendarFile(fileContent);
+      
+      // Test parsing
+      assert(parsed.SUMMARY && parsed.SUMMARY[0] === 'Test Event',
+        'VCS Single: Parse SUMMARY', 'Test Event', parsed.SUMMARY ? parsed.SUMMARY[0] : 'null');
+      
+      assert(parsed.DTSTART && parsed.DTSTART[0] === '20251018T140000Z',
+        'VCS Single: Parse DTSTART', '20251018T140000Z', parsed.DTSTART ? parsed.DTSTART[0] : 'null');
+      
+      // Test conversion to Google Calendar format
+      const googleEvent = convertICSToGoogleCalendarEvent(parsed);
+      
+      assertEquals(
+        { summary: 'Test Event' },
+        { summary: googleEvent.summary },
+        'VCS Single: Google Calendar summary'
+      );
+      
+      assertEquals(
+        { dateTime: '2025-10-18T14:00:00Z', timeZone: 'UTC' },
+        googleEvent.start,
+        'VCS Single: Google Calendar start time'
+      );
+    }
+
+    async function testMultipleICS() {
+      const fileContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//iCalendar Extension//EN
+
+BEGIN:VEVENT
+UID:test-1@example.com
+DTSTART:20251018T090000Z
+DTEND:20251018T100000Z
+SUMMARY:Morning Standup
+END:VEVENT
+
+BEGIN:VEVENT
+UID:test-2@example.com
+DTSTART:20251018T130000Z
+DTEND:20251018T140000Z
+SUMMARY:Lunch Break
+END:VEVENT
+
+END:VCALENDAR`;
+
+      const parsed = parseCalendarFile(fileContent);
+      
+      // Note: The current parser only captures the FIRST event
+      // This is a limitation we should document
+      assert(parsed.SUMMARY && parsed.SUMMARY.length > 0,
+        'ICS Multiple: Parse returns data', 'Has data', parsed.SUMMARY ? 'Has data' : 'No data');
+      
+      // The current implementation takes the first event when multiple events exist
+      assert(parsed.SUMMARY && parsed.SUMMARY[0] === 'Morning Standup',
+        'ICS Multiple: First event captured', 'Morning Standup', parsed.SUMMARY ? parsed.SUMMARY[0] : 'null');
+    }
+
+    async function testMultipleVCS() {
+      const fileContent = `BEGIN:VCALENDAR
+VERSION:1.0
+PRODID:-//iCalendar Extension//EN
+
+BEGIN:VEVENT
+UID:test-1@example.com
+DTSTART:20251018T090000Z
+DTEND:20251018T100000Z
+SUMMARY:Morning Standup
+END:VEVENT
+
+BEGIN:VEVENT
+UID:test-2@example.com
+DTSTART:20251018T130000Z
+DTEND:20251018T140000Z
+SUMMARY:Lunch Break
+END:VEVENT
+
+END:VCALENDAR`;
+
+      const parsed = parseCalendarFile(fileContent);
+      
+      assert(parsed.SUMMARY && parsed.SUMMARY.length > 0,
+        'VCS Multiple: Parse returns data', 'Has data', parsed.SUMMARY ? 'Has data' : 'No data');
+    }
+
+    function testDateTimeParsing() {
+      // Test UTC datetime
+      const utcResult = parseICSDateTime('20251018T140000Z');
+      assertEquals(
+        { dateTime: '2025-10-18T14:00:00Z', timeZone: 'UTC' },
+        utcResult,
+        'DateTime: Parse UTC format'
+      );
+      
+      // Test date only
+      const dateResult = parseICSDateTime('20251018');
+      assertEquals(
+        { date: '2025-10-18' },
+        dateResult,
+        'DateTime: Parse date-only format'
+      );
+      
+      // Test local datetime (without Z)
+      const localResult = parseICSDateTime('20251018T140000');
+      assert(
+        localResult && localResult.dateTime === '2025-10-18T14:00:00',
+        'DateTime: Parse local datetime format',
+        '2025-10-18T14:00:00',
+        localResult ? localResult.dateTime : 'null'
+      );
+      
+      // Test null input
+      const nullResult = parseICSDateTime(null);
+      assertEquals(
+        null,
+        nullResult,
+        'DateTime: Handle null input'
+      );
+    }
+
+    // Auto-run tests on page load
+    window.addEventListener('load', () => {
+      console.log('Test page loaded. Click "Run All Tests" to begin.');
+    });
+  </script>
+</body>
+</html>
+
