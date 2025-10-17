@@ -1,0 +1,77 @@
+name: Test and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      generate_release:
+        description: 'Generate release artifact after tests'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run tests
+        id: tests
+        run: node tests/test_parser.js
+
+      - name: Tests failed - stopping workflow
+        if: failure()
+        run: |
+          echo "❌ Tests failed! Release build cancelled."
+          echo "Please fix the failing tests before generating a release."
+          exit 1
+
+      - name: Get version from manifest
+        id: version
+        if: success()
+        run: |
+          VERSION=$(grep -o '"version": "[^"]*' manifest.json | grep -o '[^"]*$')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Build release package
+        if: ${{ success() && (github.event.inputs.generate_release == 'true' || github.event.inputs.generate_release == '') }}
+        run: |
+          chmod +x scripts/build_release.sh
+          ./scripts/build_release.sh
+
+      - name: Find release artifact
+        if: ${{ success() && (github.event.inputs.generate_release == 'true' || github.event.inputs.generate_release == '') }}
+        id: find_artifact
+        run: |
+          LATEST_ZIP=$(ls -t releases/*.zip | head -n 1)
+          echo "artifact_path=$LATEST_ZIP" >> $GITHUB_OUTPUT
+          echo "artifact_name=$(basename $LATEST_ZIP)" >> $GITHUB_OUTPUT
+          echo "Found artifact: $LATEST_ZIP"
+
+      - name: Upload release artifact
+        if: ${{ success() && (github.event.inputs.generate_release == 'true' || github.event.inputs.generate_release == '') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension-v${{ steps.version.outputs.version }}
+          path: ${{ steps.find_artifact.outputs.artifact_path }}
+          retention-days: 90
+
+      - name: Test summary
+        if: success()
+        run: |
+          echo "✅ All tests passed!"
+          echo "📦 Extension version: ${{ steps.version.outputs.version }}"
+          if [ "${{ github.event.inputs.generate_release }}" == "true" ] || [ -z "${{ github.event.inputs.generate_release }}" ]; then
+            echo "🎉 Release artifact generated: ${{ steps.find_artifact.outputs.artifact_name }}"
+          fi
