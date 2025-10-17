@@ -28,10 +28,10 @@ if [ -f "$KEY_FILE" ]; then
     echo -e "${YELLOW}Using existing key...${NC}\n"
 else
     echo -e "${CYAN}Generating new private key...${NC}"
-    
+
     # Generate the private key
     openssl genrsa 2048 2>/dev/null | openssl pkcs8 -topk8 -nocrypt -out "$KEY_FILE" 2>/dev/null
-    
+
     if [ $? -eq 0 ] && [ -f "$KEY_FILE" ]; then
         echo -e "${GREEN}✓ Private key generated: ${KEY_FILE}${NC}"
         echo -e "${RED}⚠️  IMPORTANT: Keep this file secure and NEVER commit it to git!${NC}\n"
@@ -128,4 +128,3 @@ echo "4. Keep ${KEY_FILE} backed up securely (never commit to git!)"
 echo ""
 
 echo -e "${GREEN}Done!${NC}\n"
-

@@ -1,45 +1,56 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ICS File Reader</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <img src="images/logo_512x512.png" alt="iCalendar Logo" class="logo">
-      <h1 class="app-title">iCalendar</h1>
-    </div>
-    
-    <div id="errorMessage" class="error-message hidden"></div>
-    <div id="successMessage" class="success-message hidden"></div>
-    
-    <div id="calendarSelector" class="calendar-selector hidden">
-      <label for="calendarDropdown">Select Calendar:</label>
-      <select id="calendarDropdown" class="calendar-dropdown">
-        <option value="primary">Loading calendars...</option>
-      </select>
-    </div>
-    
-    <div id="fileInfo" class="file-info hidden">
-      <h3 id="eventTitle">Event</h3>
-      <div id="fileList" class="file-list"></div>
-      <button id="createEventBtn" class="create-event-btn hidden">Add to Calendar</button>
-    </div>
-    
-    <div id="dropZone" class="drop-zone">
-      <div class="drop-zone-content">
-        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-        </svg>
-        <h2>Drag & Drop</h2>
-        <h3>or click to browse</h3>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ICS File Reader</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="images/logo_512x512.png" alt="iCalendar Logo" class="logo" />
+        <h1 class="app-title">iCalendar</h1>
+      </div>
+
+      <div id="errorMessage" class="error-message hidden"></div>
+      <div id="successMessage" class="success-message hidden"></div>
+
+      <div id="calendarSelector" class="calendar-selector hidden">
+        <label for="calendarDropdown">Select Calendar:</label>
+        <select id="calendarDropdown" class="calendar-dropdown">
+          <option value="primary">Loading calendars...</option>
+        </select>
+      </div>
+
+      <div id="fileInfo" class="file-info hidden">
+        <h3 id="eventTitle">Event</h3>
+        <div id="fileList" class="file-list"></div>
+        <button id="createEventBtn" class="create-event-btn hidden">Add to Calendar</button>
+      </div>
+
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-zone-content">
+          <svg
+            class="icon"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+            />
+          </svg>
+          <h2>Drag & Drop</h2>
+          <h3>or click to browse</h3>
+        </div>
       </div>
     </div>
-  </div>
-  
-  <script src="popup.js"></script>
-</body>
+
+    <script src="popup.js"></script>
+  </body>
 </html>

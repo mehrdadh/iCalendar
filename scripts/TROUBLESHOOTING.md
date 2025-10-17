@@ -16,23 +16,27 @@ The authentication flow in this extension works as follows:
 8. **background.js** uses the token to call Google Calendar API
 9. **Success/error message** is sent back to popup.js and displayed
 
-**Important**: This extension **always requests fresh authentication** each time you create an event. It does not use cached tokens, ensuring you always explicitly grant permission.
+**Important**: This extension **always requests fresh authentication** each time you create an event. It does not
+use cached tokens, ensuring you always explicitly grant permission.
 
 ## Common Issues and Solutions
 
 ### Issue 1: Button doesn't do anything when clicked
 
 **Possible causes:**
+
 1. Background script not loaded
 2. OAuth Client ID not configured
 3. Extension not properly reloaded after changes
 
 **How to check:**
+
 1. Open Chrome DevTools Console (F12) on the extension popup
 2. Click the button and look for console messages
 3. Check for errors in red
 
 **Solution:**
+
 - Go to `chrome://extensions/`
 - Find your extension
 - Click the "Reload" button
@@ -43,6 +47,7 @@ The authentication flow in this extension works as follows:
 **Cause:** The Client ID in `manifest.json` hasn't been updated
 
 **Solution:**
+
 1. Follow the complete setup in [SETUP.md](SETUP.md)
 2. Get your Client ID from Google Cloud Console
 3. Open `manifest.json`
@@ -54,12 +59,14 @@ The authentication flow in this extension works as follows:
 **Cause:** Background script failed to load
 
 **How to check:**
+
 1. Go to `chrome://extensions/`
 2. Find your extension
 3. Click "service worker" link (under "Inspect views")
 4. Check the console for errors
 
 **Solution:**
+
 - Make sure `background.js` exists in your extension folder
 - Check that `manifest.json` has the correct reference to it
 - Reload the extension
@@ -67,15 +74,18 @@ The authentication flow in this extension works as follows:
 ### Issue 4: Authentication popup doesn't appear
 
 **Possible causes:**
+
 1. Popup blockers
 2. Invalid OAuth configuration
 3. Extension ID mismatch
 
 **How to check:**
+
 1. Look at the background service worker console (see Issue 3)
 2. Check for authentication-related errors
 
 **Solution:**
+
 1. Verify your OAuth setup in Google Cloud Console
 2. Make sure the Extension ID in Google Cloud matches your actual extension ID
 3. Try removing and re-adding the extension
@@ -85,6 +95,7 @@ The authentication flow in this extension works as follows:
 **Cause:** OAuth consent screen not properly configured or you're not added as a test user
 
 **Solution:**
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Navigate to "APIs & Services" > "OAuth consent screen"
 3. Scroll down to "Test users"
@@ -110,12 +121,14 @@ The authentication flow in this extension works as follows:
 4. Watch the console for messages
 
 **Expected console output:**
-```
+
+```javascript
 Event data to send: {summary: "...", start: {...}, end: {...}}
 Response from background: {success: true, result: {...}}
 ```
 
 **If you see errors:**
+
 - Copy the error message
 - Check the solutions above
 
@@ -138,6 +151,7 @@ Open `manifest.json` and verify:
 ```
 
 Make sure:
+
 - ✅ `client_id` is NOT "YOUR_CLIENT_ID" (must be your actual ID)
 - ✅ All files exist in your extension folder
 - ✅ No syntax errors in the JSON
@@ -146,7 +160,7 @@ Make sure:
 
 Create a test file called `test.ics`:
 
-```
+```ics
 BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Test//Test//EN
@@ -184,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const testBtn = document.createElement('button');
   testBtn.textContent = 'Test OAuth';
   testBtn.onclick = () => {
-    chrome.runtime.sendMessage({ action: 'getAuthToken' }, (response) => {
+    chrome.runtime.sendMessage({ action: 'getAuthToken' }, response => {
       console.log('OAuth test result:', response);
       alert(response.success ? 'OAuth works!' : 'OAuth failed: ' + response.error);
     });

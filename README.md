@@ -1,6 +1,7 @@
 # iCalendar File Importer Chrome Extension
 
-A Chrome extension that reads .ics and .vcs calendar files and creates Google Calendar events from them with a beautiful, modern interface.
+A Chrome extension that reads .ics and .vcs calendar files and creates Google Calendar events from them with a
+beautiful, modern interface.
 
 ## Features
 
@@ -14,7 +15,8 @@ A Chrome extension that reads .ics and .vcs calendar files and creates Google Ca
 - 🔐 **Secure OAuth** - First-time authentication, then cached tokens (persistent storage)
 - 💾 **Smart token caching** - No repeated auth prompts (survives service worker restarts)
 - 📏 **Compact design** - Optimized spacing and font sizes
-- 🎯 **ICS & VCS standard compliant** - Supports both iCalendar 2.0 (.ics) and vCalendar 1.0 (.vcs) formats with proper handling of escape sequences and line folding
+- 🎯 **ICS & VCS standard compliant** - Supports both iCalendar 2.0 (.ics) and vCalendar 1.0 (.vcs) formats with
+  proper handling of escape sequences and line folding
 
 ## Installation
 
@@ -35,6 +37,7 @@ No hard-coded credentials required! Each user brings their own OAuth credentials
 See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructions.
 
 **Quick steps:**
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create project and enable Calendar API
 3. Set up OAuth consent screen
@@ -62,7 +65,7 @@ See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructio
 
 ## Files Structure
 
-```
+```text
 chrome_extension/
 ├── manifest.json                      # Extension configuration with OAuth2 scopes
 ├── popup.html                         # Extension popup UI
@@ -92,7 +95,7 @@ chrome_extension/
 1. **First-Time Setup**: On first use, you'll be prompted to authorize with Google Calendar
 2. **Calendar Loading**: Your Google Calendars load automatically and are cached for quick access
 3. **File Validation**: Drag and drop validates `.ics` or `.vcs` file extension
-4. **Calendar File Parsing**: 
+4. **Calendar File Parsing**:
    - Auto-detects iCalendar 2.0 (.ics) or vCalendar 1.0 (.vcs) format
    - Handles line folding per RFC 5545 and vCalendar specs
    - Decodes escape sequences (`\n` → newlines, etc.)
@@ -110,11 +113,13 @@ chrome_extension/
 ### Feature Flags
 
 Event caching can be toggled in `popup.js`:
+
 ```javascript
 const ENABLE_EVENT_CACHING = false; // Set to true to persist events across sessions
 ```
 
-All file processing happens locally in your browser. The extension only communicates with Google Calendar API when loading calendars or creating events.
+All file processing happens locally in your browser. The extension only communicates with Google Calendar API when
+loading calendars or creating events.
 
 ## What Gets Created in Google Calendar
 
@@ -136,27 +141,32 @@ The extension extracts and creates events with the following information from yo
 
 ## Troubleshooting
 
-**"Unsupported file type" error**
+### "Unsupported file type" error
+
 - Make sure your file has the `.ics` or `.vcs` extension
 - Verify the file is a valid iCalendar or vCalendar file
 
-**"Failed to create event" error**
+### "Failed to create event" error
+
 - Check that you've completed the Google Calendar API setup
 - Verify your Client ID is correct in `popup.js` (line ~16)
 - Make sure you're added as a test user in Google Cloud Console
 - Ensure Calendar API is enabled in your Google Cloud project
 - Try reloading the extension
 
-**No calendars showing**
+### No calendars showing
+
 - Check browser console for errors (Right-click popup → Inspect → Console)
 - Verify you granted calendar.readonly permission
 - Reload the extension and reauthorize
 
-**OAuth/Authentication errors**
+### OAuth/Authentication errors
+
 - See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for setup instructions
 - See [TOKEN_CACHING_INFO.md](./scripts/TOKEN_CACHING_INFO.md) for token behavior
 
-**Event not persisting after closing popup**
+### Event not persisting after closing popup
+
 - This is expected behavior with `ENABLE_EVENT_CACHING = false`
 - Set flag to `true` in `popup.js` to enable persistence
 

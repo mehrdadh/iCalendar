@@ -84,15 +84,14 @@ if [ $? -eq 0 ] && [ -f "$ZIP_PATH" ]; then
     echo -e "  Output: ${ZIP_PATH}"
     echo -e "  Size: ${FILE_SIZE}"
     echo -e "${GREEN}========================================${NC}\n"
-    
+
     # List contents of the zip
     echo -e "${YELLOW}Package contents:${NC}"
     unzip -l "$ZIP_PATH"
-    
+
     echo -e "\n${GREEN}Ready for Chrome Web Store upload!${NC}"
     echo -e "Upload at: ${YELLOW}https://chrome.google.com/webstore/devconsole${NC}\n"
 else
     echo -e "${RED}ERROR: Failed to create release package${NC}"
     exit 1
 fi
-

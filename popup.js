@@ -21,7 +21,7 @@ const calendarDropdown = document.getElementById('calendarDropdown');
 console.log('DOM elements loaded:', {
   dropZone: !!dropZone,
   fileInfo: !!fileInfo,
-  createEventBtn: !!createEventBtn
+  createEventBtn: !!createEventBtn,
 });
 
 // Store parsed ICS data globally
@@ -52,12 +52,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     // First, check if user is authorized
     const isAuthorized = await checkAndRequestAuthorization();
-    
+
     // If authorized, load calendars
     if (isAuthorized) {
       await loadCalendars();
     }
-    
+
     // Then restore event data if available (if caching is enabled)
     if (ENABLE_EVENT_CACHING) {
       const stored = await chrome.storage.local.get(['eventData', 'fileName']);
@@ -81,19 +81,19 @@ async function checkAndRequestAuthorization() {
   try {
     // Check if we already have authorization
     const stored = await chrome.storage.local.get(['isAuthorized', 'hasPromptedAuth']);
-    
+
     // If already authorized, nothing to do
     if (stored.isAuthorized) {
       console.log('User is already authorized');
       return true;
     }
-    
+
     // If we haven't prompted for auth yet, or if authorization was lost, prompt now
     if (!stored.hasPromptedAuth) {
       console.log('First time setup - requesting authorization');
       await promptForAuthorization();
     }
-    
+
     return stored.isAuthorized || false;
   } catch (error) {
     console.error('Error checking authorization:', error);
@@ -105,16 +105,16 @@ async function checkAndRequestAuthorization() {
 async function promptForAuthorization() {
   try {
     // Show a friendly message
-    showInfo('Welcome! Let\'s connect to your Google Calendar...');
-    
+    showInfo("Welcome! Let's connect to your Google Calendar...");
+
     // Request authorization by attempting to get a token
-    const response = await new Promise((resolve) => {
+    const response = await new Promise(resolve => {
       chrome.runtime.sendMessage(
         {
           action: 'requestAuthorization',
-          clientId: GOOGLE_CLIENT_ID
+          clientId: GOOGLE_CLIENT_ID,
         },
-        (response) => {
+        response => {
           if (chrome.runtime.lastError) {
             console.error('Authorization error:', chrome.runtime.lastError);
             resolve({ success: false, error: chrome.runtime.lastError.message });
@@ -124,15 +124,15 @@ async function promptForAuthorization() {
         }
       );
     });
-    
+
     if (response && response.success) {
       // Mark as authorized
       await chrome.storage.local.set({
         isAuthorized: true,
-        hasPromptedAuth: true
+        hasPromptedAuth: true,
       });
       showSuccess('Successfully connected to Google Calendar! ✓');
-      
+
       // Hide success message after 3 seconds
       setTimeout(() => {
         successMessage.classList.add('hidden');
@@ -141,7 +141,7 @@ async function promptForAuthorization() {
       // Mark that we attempted to prompt
       await chrome.storage.local.set({
         hasPromptedAuth: true,
-        isAuthorized: false
+        isAuthorized: false,
       });
       showError('Authorization was not completed. You can try again later.');
     }
@@ -149,7 +149,7 @@ async function promptForAuthorization() {
     console.error('Error prompting for authorization:', error);
     await chrome.storage.local.set({
       hasPromptedAuth: true,
-      isAuthorized: false
+      isAuthorized: false,
     });
   }
 }
@@ -166,7 +166,7 @@ function showInfo(message) {
 async function loadCalendars() {
   try {
     console.log('Loading calendars...');
-    
+
     // First, load from cache immediately
     const stored = await chrome.storage.local.get(['calendars']);
     if (stored.calendars && stored.calendars.length > 0) {
@@ -178,15 +178,15 @@ async function loadCalendars() {
       calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
       calendarSelector.classList.remove('hidden');
     }
-    
+
     // Then fetch fresh data in background
-    const response = await new Promise((resolve) => {
+    const response = await new Promise(resolve => {
       chrome.runtime.sendMessage(
         {
           action: 'getCalendars',
-          clientId: GOOGLE_CLIENT_ID
+          clientId: GOOGLE_CLIENT_ID,
         },
-        (response) => {
+        response => {
           if (chrome.runtime.lastError) {
             console.error('Error loading calendars:', chrome.runtime.lastError);
             resolve({ success: false, error: chrome.runtime.lastError.message });
@@ -196,13 +196,13 @@ async function loadCalendars() {
         }
       );
     });
-    
+
     if (response && response.success && response.calendars) {
       console.log('Calendars loaded from API:', response.calendars);
-      
+
       // Update dropdown with fresh data
       populateCalendarDropdown(response.calendars);
-      
+
       // Save calendars to storage
       await chrome.storage.local.set({ calendars: response.calendars });
     } else {
@@ -221,27 +221,30 @@ async function loadCalendars() {
 function populateCalendarDropdown(calendars) {
   // Save current selection
   const currentSelection = calendarDropdown.value;
-  
+
   // Clear dropdown
   calendarDropdown.innerHTML = '';
-  
+
   // Add calendars to dropdown
   calendars.forEach(calendar => {
     const option = document.createElement('option');
     option.value = calendar.id;
     option.textContent = calendar.summary;
-    
+
     // Mark primary calendar
     if (calendar.primary) {
       option.textContent += ' (Primary)';
       option.selected = true;
     }
-    
+
     calendarDropdown.appendChild(option);
   });
-  
+
   // Restore previous selection if it still exists
-  if (currentSelection && Array.from(calendarDropdown.options).some(opt => opt.value === currentSelection)) {
+  if (
+    currentSelection &&
+    Array.from(calendarDropdown.options).some(opt => opt.value === currentSelection)
+  ) {
     calendarDropdown.value = currentSelection;
   }
 }
@@ -280,26 +283,26 @@ dropZone.addEventListener('drop', handleDrop, false);
 function handleDrop(e) {
   const dt = e.dataTransfer;
   const files = dt.files;
-  
+
   handleFiles(files);
 }
 
 function handleFiles(files) {
   // Clear previous displays
   clearEventDisplay();
-  
+
   // Only handle single file
   if (files.length === 0) return;
-  
+
   const file = files[0];
-  
+
   // Check if file has .ics or .vcs extension
   const fileName = file.name.toLowerCase();
   if (!fileName.endsWith('.ics') && !fileName.endsWith('.vcs')) {
     showError('Unsupported file type. Please upload an .ics or .vcs file.');
     return;
   }
-  
+
   // Read and parse the calendar file
   readCalendarFile(file);
 }
@@ -311,29 +314,29 @@ function showError(message) {
 
 function readCalendarFile(file) {
   const reader = new FileReader();
-  
-  reader.onload = function(e) {
+
+  reader.onload = function (e) {
     const content = e.target.result;
     const calendarData = parseCalendarFile(content);
     displayICSAttributes(file.name, calendarData);
   };
-  
-  reader.onerror = function() {
+
+  reader.onerror = function () {
     showError('Error reading file. Please try again.');
   };
-  
+
   reader.readAsText(file);
 }
 
 function parseCalendarFile(content) {
   // First, unfold lines (both ICS and VCS spec: lines starting with space/tab are continuations)
   const unfoldedContent = content.replace(/\r\n /g, '').replace(/\n /g, '').replace(/\r /g, '');
-  
+
   const lines = unfoldedContent.split(/\r\n|\n|\r/);
   const attributes = {};
   let inEvent = false;
   let isVCS = false;
-  
+
   // Detect if this is a VCS (vCalendar 1.0) or ICS (iCalendar 2.0) file
   for (const line of lines) {
     if (line.trim().startsWith('VERSION:1.0')) {
@@ -346,39 +349,39 @@ function parseCalendarFile(content) {
       break;
     }
   }
-  
+
   lines.forEach(line => {
     line = line.trim();
-    
+
     if (line === 'BEGIN:VEVENT') {
       inEvent = true;
       return;
     }
-    
+
     if (line === 'END:VEVENT') {
       inEvent = false;
       return;
     }
-    
+
     if (!inEvent) return;
-    
+
     // Parse key-value pairs
     const colonIndex = line.indexOf(':');
     if (colonIndex > 0) {
       const key = line.substring(0, colonIndex);
       let value = line.substring(colonIndex + 1);
-      
+
       // Handle special keys with parameters (e.g., DTSTART;TZID=...)
       const semicolonIndex = key.indexOf(';');
       const cleanKey = semicolonIndex > 0 ? key.substring(0, semicolonIndex) : key;
-      
+
       // Decode escape sequences
       // Both ICS and VCS use similar escaping: \n = newline, \, = comma, \; = semicolon, \\ = backslash
       value = value.replace(/\\n/g, '\n');
       value = value.replace(/\\,/g, ',');
       value = value.replace(/\\;/g, ';');
       value = value.replace(/\\\\/g, '\\');
-      
+
       // Handle VCS-specific fields (convert to ICS equivalents)
       let mappedKey = cleanKey;
       if (isVCS) {
@@ -388,7 +391,7 @@ function parseCalendarFile(content) {
           mappedKey = 'AALARM'; // Keep as is for now
         }
       }
-      
+
       // Store the attribute
       if (!attributes[mappedKey]) {
         attributes[mappedKey] = [];
@@ -396,7 +399,7 @@ function parseCalendarFile(content) {
       attributes[mappedKey].push(value);
     }
   });
-  
+
   return attributes;
 }
 
@@ -404,27 +407,30 @@ function displayICSAttributes(fileName, attributes, saveToStorage = true) {
   // Store data globally
   currentICSData = attributes;
   currentFileName = fileName;
-  
+
   // Save to storage for persistence (only if caching is enabled and requested)
   if (saveToStorage && ENABLE_EVENT_CACHING) {
     console.log('Saving event to storage:', fileName);
-    chrome.storage.local.set({
-      eventData: attributes,
-      fileName: fileName
-    }).then(() => {
-      console.log('✓ Event saved to storage');
-    }).catch(error => {
-      console.error('Error saving event data:', error);
-    });
+    chrome.storage.local
+      .set({
+        eventData: attributes,
+        fileName: fileName,
+      })
+      .then(() => {
+        console.log('✓ Event saved to storage');
+      })
+      .catch(error => {
+        console.error('Error saving event data:', error);
+      });
   } else if (!saveToStorage) {
     console.log('Skipping save to storage (restoring from cache)');
   } else {
     console.log('Skipping save to storage (caching disabled)');
   }
-  
+
   fileInfo.classList.remove('hidden');
   createEventBtn.classList.remove('hidden');
-  
+
   // Check if we have data
   if (Object.keys(attributes).length === 0) {
     const emptyMsg = document.createElement('div');
@@ -435,7 +441,7 @@ function displayICSAttributes(fileName, attributes, saveToStorage = true) {
     eventTitle.textContent = 'Event';
     return;
   }
-  
+
   // Get the event title (SUMMARY) and set it as the heading
   const summary = attributes['SUMMARY'];
   if (summary && summary.length > 0) {
@@ -443,31 +449,31 @@ function displayICSAttributes(fileName, attributes, saveToStorage = true) {
   } else {
     eventTitle.textContent = 'Untitled Event';
   }
-  
+
   // Define the fields we want to display in order (without SUMMARY since it's in the title)
   const fieldsToDisplay = [
     { key: 'DTSTART', label: 'Start Time' },
     { key: 'DTEND', label: 'End Time' },
-    { key: 'LOCATION', label: 'Location' }
+    { key: 'LOCATION', label: 'Location' },
   ];
-  
+
   // Display only the specified fields
   fieldsToDisplay.forEach(field => {
     const values = attributes[field.key];
     if (values && values.length > 0) {
       const value = values[0]; // Take first value
-      
+
       const attrDiv = document.createElement('div');
       attrDiv.className = 'attribute-item';
-      
+
       const keySpan = document.createElement('span');
       keySpan.className = 'attr-key';
       keySpan.textContent = field.label;
-      
+
       const valueSpan = document.createElement('span');
       valueSpan.className = 'attr-value';
       valueSpan.textContent = formatAttributeValue(field.key, value);
-      
+
       attrDiv.appendChild(keySpan);
       attrDiv.appendChild(valueSpan);
       fileList.appendChild(attrDiv);
@@ -480,12 +486,12 @@ function formatAttributeValue(key, value) {
   if (key.includes('DT') || key === 'DTSTAMP' || key === 'CREATED' || key === 'LAST-MODIFIED') {
     return formatDateTime(value);
   }
-  
+
   // Truncate very long values
   if (value.length > 100) {
     return value.substring(0, 100) + '...';
   }
-  
+
   return value;
 }
 
@@ -507,17 +513,17 @@ function formatDateTime(dateTimeStr) {
     const second = dateTimeStr.substring(13, 15);
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
   }
-  
+
   return dateTimeStr;
 }
 
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
@@ -532,14 +538,14 @@ async function clearEventDisplay() {
   eventTitle.textContent = 'Event';
   currentICSData = null;
   currentFileName = null;
-  
+
   // Clear storage (only if caching is enabled)
   if (ENABLE_EVENT_CACHING) {
     try {
       console.log('Attempting to clear storage...');
       await chrome.storage.local.remove(['eventData', 'fileName']);
       console.log('✓ Event data cleared from storage');
-      
+
       // Verify it's actually cleared
       const check = await chrome.storage.local.get(['eventData', 'fileName']);
       console.log('Storage after clear:', check);
@@ -555,32 +561,32 @@ createEventBtn.addEventListener('click', async () => {
     showError('No ICS data available. Please load a file first.');
     return;
   }
-  
+
   // Disable button and show initial loading state
   createEventBtn.disabled = true;
   createEventBtn.textContent = BUTTON_TEXT_PROCESSING;
   errorMessage.classList.add('hidden');
   successMessage.classList.add('hidden');
-  
+
   try {
     const eventData = convertICSToGoogleCalendarEvent(currentICSData);
     console.log('Event data to send:', eventData);
-    
+
     // Get selected calendar ID
     const calendarId = calendarDropdown.value || 'primary';
     console.log('Selected calendar:', calendarId);
-    
+
     // Send message to background script with Client ID
     // forceAuth: false - will use cached token if available
     chrome.runtime.sendMessage(
-      { 
-        action: 'createCalendarEvent', 
+      {
+        action: 'createCalendarEvent',
         eventData: eventData,
         calendarId: calendarId,
         clientId: GOOGLE_CLIENT_ID,
-        forceAuth: false  // Use cached token if available
+        forceAuth: false, // Use cached token if available
       },
-      (response) => {
+      response => {
         // Check for runtime errors
         if (chrome.runtime.lastError) {
           console.error('Runtime error:', chrome.runtime.lastError);
@@ -589,15 +595,15 @@ createEventBtn.addEventListener('click', async () => {
           showError(`Connection error: ${chrome.runtime.lastError.message}`);
           return;
         }
-        
+
         console.log('Response from background:', response);
         createEventBtn.disabled = false;
         createEventBtn.textContent = BUTTON_TEXT_DEFAULT;
-        
+
         if (response && response.success) {
           // Show success message
           showSuccess('Event added to Google Calendar! ✓');
-          
+
           // After 2 seconds, fade out and clear
           setTimeout(() => {
             // Add fade-out class
@@ -605,7 +611,7 @@ createEventBtn.addEventListener('click', async () => {
             successMessage.style.transition = 'opacity 0.5s ease';
             fileInfo.style.opacity = '0';
             successMessage.style.opacity = '0';
-            
+
             // After fade completes, clear everything
             setTimeout(async () => {
               await clearEventDisplay();
@@ -641,38 +647,40 @@ function convertICSToGoogleCalendarEvent(icsData) {
     description: getFirstValue(icsData, 'DESCRIPTION') || '',
     location: getFirstValue(icsData, 'LOCATION') || '',
   };
-  
+
   // Handle start time
   const dtstart = getFirstValue(icsData, 'DTSTART');
   if (dtstart) {
     event.start = parseICSDateTime(dtstart);
   }
-  
+
   // Handle end time
   const dtend = getFirstValue(icsData, 'DTEND');
   if (dtend) {
     event.end = parseICSDateTime(dtend);
   }
-  
+
   // Handle recurrence rules if present
   const rrule = getFirstValue(icsData, 'RRULE');
   if (rrule) {
     event.recurrence = [`RRULE:${rrule}`];
   }
-  
+
   // Handle attendees
   const attendees = icsData['ATTENDEE'];
   if (attendees && attendees.length > 0) {
-    event.attendees = attendees.map(attendee => {
-      // Extract email from ATTENDEE field (format: mailto:email@example.com)
-      const emailMatch = attendee.match(/mailto:([^\s]+)/i);
-      if (emailMatch) {
-        return { email: emailMatch[1] };
-      }
-      return null;
-    }).filter(a => a !== null);
+    event.attendees = attendees
+      .map(attendee => {
+        // Extract email from ATTENDEE field (format: mailto:email@example.com)
+        const emailMatch = attendee.match(/mailto:([^\s]+)/i);
+        if (emailMatch) {
+          return { email: emailMatch[1] };
+        }
+        return null;
+      })
+      .filter(a => a !== null);
   }
-  
+
   return event;
 }
 
@@ -683,10 +691,10 @@ function getFirstValue(data, key) {
 function parseICSDateTime(icsDateTime) {
   // ICS format: YYYYMMDDTHHMMSSZ or YYYYMMDD
   if (!icsDateTime) return null;
-  
+
   // Remove any timezone info for simplicity
   icsDateTime = icsDateTime.replace(/;.*$/, '');
-  
+
   if (icsDateTime.length === 8) {
     // Date only: YYYYMMDD
     const year = icsDateTime.substring(0, 4);
@@ -701,21 +709,21 @@ function parseICSDateTime(icsDateTime) {
     const hour = icsDateTime.substring(9, 11);
     const minute = icsDateTime.substring(11, 13);
     const second = icsDateTime.substring(13, 15);
-    
+
     // Check if it's UTC (ends with Z)
     if (icsDateTime.endsWith('Z')) {
-      return { 
+      return {
         dateTime: `${year}-${month}-${day}T${hour}:${minute}:${second}Z`,
-        timeZone: 'UTC'
+        timeZone: 'UTC',
       };
     } else {
-      return { 
+      return {
         dateTime: `${year}-${month}-${day}T${hour}:${minute}:${second}`,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
     }
   }
-  
+
   return null;
 }
 
@@ -725,10 +733,10 @@ dropZone.addEventListener('click', () => {
   input.type = 'file';
   input.accept = '.ics,.vcs';
   input.multiple = false;
-  
-  input.addEventListener('change', (e) => {
+
+  input.addEventListener('change', e => {
     handleFiles(e.target.files);
   });
-  
+
   input.click();
 });

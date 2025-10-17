@@ -1,8 +1,9 @@
-# User Setup Guide - No Hardcoded Credentials!
+# User Setup Guide - No Hardcoded Credentials
 
 ## ✨ What's New
 
-This extension now allows **YOU** to use your own Google OAuth credentials instead of requiring hardcoded credentials in the code!
+This extension now allows **YOU** to use your own Google OAuth credentials instead of requiring hardcoded
+credentials in the code!
 
 ## 🎯 How It Works
 
@@ -18,11 +19,13 @@ This extension now allows **YOU** to use your own Google OAuth credentials inste
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing one
 3. Enable "Google Calendar API":
+
    - Go to "APIs & Services" > "Library"
    - Search "Google Calendar API"
    - Click "Enable"
 
 4. Set up OAuth consent screen:
+
    - Go to "APIs & Services" > "OAuth consent screen"
    - Choose "External"
    - Fill in app name: "My ICS Reader"
@@ -31,15 +34,19 @@ This extension now allows **YOU** to use your own Google OAuth credentials inste
    - Add yourself as test user
 
 5. Create OAuth Client ID:
+
    - Go to "APIs & Services" > "Credentials"
    - Click "Create Credentials" > "OAuth client ID"
    - Application type: **"Web application"** (important!)
    - Name: "ICS Reader"
    - Authorized redirect URIs: Add this URL:
-     ```
+
+     ```text
      https://<YOUR_EXTENSION_ID>.chromiumapp.org/
      ```
+
      (Get your extension ID from chrome://extensions/)
+
    - Click "Create"
    - **COPY THE CLIENT ID** (looks like: `123456789-abc.apps.googleusercontent.com`)
 
@@ -76,7 +83,7 @@ This extension now allows **YOU** to use your own Google OAuth credentials inste
 ✅ **Your own Google project** - you own the OAuth app  
 ✅ **Transparent authentication** - you see every permission request  
 ✅ **Works with any Google account** - personal or workspace  
-✅ **Free to use** - Google Cloud OAuth is free for personal use  
+✅ **Free to use** - Google Cloud OAuth is free for personal use
 
 ## ❓ FAQ
 
@@ -100,29 +107,33 @@ A: In your browser's local storage (chrome.storage.local). It never leaves your 
 
 ## 🆚 Comparison with Traditional Extensions
 
-| Feature | This Extension | Traditional Extension |
-|---------|---------------|----------------------|
-| OAuth Credentials | User provides their own | Hardcoded by developer |
-| Privacy | You control everything | Developer controls |
-| Setup | 5 min one-time setup | Usually pre-configured |
-| Flexibility | Use any Google account | Limited to app's account |
-| Security | Maximum transparency | Trust the developer |
+| Feature           | This Extension          | Traditional Extension    |
+| ----------------- | ----------------------- | ------------------------ |
+| OAuth Credentials | User provides their own | Hardcoded by developer   |
+| Privacy           | You control everything  | Developer controls       |
+| Setup             | 5 min one-time setup    | Usually pre-configured   |
+| Flexibility       | Use any Google account  | Limited to app's account |
+| Security          | Maximum transparency    | Trust the developer      |
 
 ## 🐛 Troubleshooting
 
-**"Please set up your Google OAuth Client ID"**  
+### "Please set up your Google OAuth Client ID"
+
 - You haven't entered a Client ID yet
 - Click the settings section and add your Client ID
 
-**"Invalid Client ID format"**  
+### "Invalid Client ID format"
+
 - Make sure you copied the entire Client ID
 - It should end with `.apps.googleusercontent.com`
 
-**"Authentication cancelled or failed"**  
+### "Authentication cancelled or failed"
+
 - You closed the Google sign-in popup
 - Try again and complete the sign-in process
 
-**"redirect_uri_mismatch" error**  
+### "redirect_uri_mismatch" error
+
 - The redirect URI in Google Cloud doesn't match your extension ID
 - Go to Google Cloud Console and update the redirect URI to:
   `https://<YOUR_EXTENSION_ID>.chromiumapp.org/`

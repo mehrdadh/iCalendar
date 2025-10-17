@@ -76,15 +76,18 @@ To use the Google Calendar integration feature, you need to set up OAuth credent
 
 ## Troubleshooting
 
-**Error: "Invalid client_id"**
+### Error: "Invalid client_id"
+
 - Make sure you copied the correct Client ID from Google Cloud Console
 - Ensure the Extension ID in Google Cloud matches your actual extension ID
 
-**Error: "Access blocked: Authorization Error"**
+### Error: "Access blocked: Authorization Error"
+
 - Make sure you've added yourself as a test user in the OAuth consent screen
 - Check that the Google Calendar API is enabled
 
-**Error: "Failed to get auth token"**
+### Error: "Failed to get auth token"
+
 - Try removing and re-adding the extension
 - Clear your browser cache and try again
 

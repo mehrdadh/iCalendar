@@ -1,15 +1,16 @@
-Tired of manually copying event details from calendar files into Google Calendar? iCalendar makes it instant! Simply drag and drop any calendar file, and add it to your Google Calendar with one click.
+Tired of manually copying event details from calendar files into Google Calendar? iCalendar makes it instant!
+Simply drag and drop any calendar file, and add it to your Google Calendar with one click.
 
 Key Features ✨
 
-* Drag & Drop Simplicity: Just drop your .ics or .vcs file onto the extension
-* Multi-Format Support: Works with both iCalendar (.ics) and vCalendar (.vcs) formats
-* Multi-Calendar Support: Choose which Google Calendar to add events to
-* Smart Event Parsing: Automatically extracts all event details (title, time, location, description)
-* One-Click Import: No manual data entry required
-* Beautiful Interface: Modern, clean design with smooth animations
-* Secure Authentication: Uses Google OAuth 2.0 for secure access
-* Privacy-Focused: Files processed locally in your browser
+- Drag & Drop Simplicity: Just drop your .ics or .vcs file onto the extension
+- Multi-Format Support: Works with both iCalendar (.ics) and vCalendar (.vcs) formats
+- Multi-Calendar Support: Choose which Google Calendar to add events to
+- Smart Event Parsing: Automatically extracts all event details (title, time, location, description)
+- One-Click Import: No manual data entry required
+- Beautiful Interface: Modern, clean design with smooth animations
+- Secure Authentication: Uses Google OAuth 2.0 for secure access
+- Privacy-Focused: Files processed locally in your browser
 
 How It Works 🚀
 
@@ -22,23 +23,23 @@ How It Works 🚀
 
 Perfect For 📋
 
-* Meeting invitations received via email
-* Event files from conference registrations
-* Exported calendar events from other services
-* Travel itineraries and reservations
-* Any .ics or .vcs calendar file
+- Meeting invitations received via email
+- Event files from conference registrations
+- Exported calendar events from other services
+- Travel itineraries and reservations
+- Any .ics or .vcs calendar file
 
 Privacy & Security 🔒
 
-* All file processing happens locally in your browser
-* No data is sent to any third-party servers
-* Connects directly to Google Calendar API for event creation
-* You control which calendars the extension can access
-* Authentication tokens are securely managed by Chrome
+- All file processing happens locally in your browser
+- No data is sent to any third-party servers
+- Connects directly to Google Calendar API for event creation
+- You control which calendars the extension can access
+- Authentication tokens are securely managed by Chrome
 
 Note: You'll need to authorize the extension to access your calendar during first use.
 
 Permissions: This extension requires calendar access to create events and list your calendars.
 
 Support & Feedback 💬
-For issues, questions, or feature requests, please visit: https://github.com/mehrdadh/iCalendar
+For issues, questions, or feature requests, please visit: <https://github.com/mehrdadh/iCalendar>

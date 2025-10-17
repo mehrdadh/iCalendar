@@ -1,0 +1,108 @@
+# Pre-commit hooks configuration for Chrome Extension
+# See https://pre-commit.com for more information
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Fix trailing whitespace
+      - id: trailing-whitespace
+        exclude: '\.md$'
+
+      # Ensure files end with newline
+      - id: end-of-file-fixer
+        exclude: '\.min\.(js|css)$'
+
+      # Check for files that would conflict in case-insensitive filesystems
+      - id: check-case-conflict
+
+      # Check for merge conflicts
+      - id: check-merge-conflict
+
+      # Check YAML files
+      - id: check-yaml
+        exclude: '\.github/.*'
+
+      # Check JSON files
+      - id: check-json
+        files: '\.(json)$'
+
+      # Prevent large files from being committed
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+
+      # Check for private keys
+      - id: detect-private-key
+
+      # Fix mixed line endings
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+      # Check for broken symlinks
+      - id: check-symlinks
+
+      # Check that shell scripts are executable
+      - id: check-executables-have-shebangs
+
+  # JavaScript/JSON formatting with Prettier
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        types_or: [javascript, json, markdown, html, css]
+        exclude: '(\.min\.(js|css)|releases/|node_modules/)'
+        additional_dependencies:
+          - prettier@3.0.0
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        exclude: '(node_modules/|\.github/)'
+
+  # Spell checking (optional - you can disable if too strict)
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        args:
+          - --ignore-words-list=crate,aci,ans,ba,nd,te,uint
+          - --skip="*.json,*.lock,*.min.js,*.min.css,releases/*"
+        exclude: '(releases/|node_modules/|\.git/)'
+
+  # Validate manifest.json for Chrome extensions
+  - repo: local
+    hooks:
+      - id: validate-manifest
+        name: Validate Chrome Extension Manifest
+        entry: python3 -c "import json, sys; json.load(open('manifest.json'))"
+        language: system
+        files: 'manifest\.json$'
+        pass_filenames: false
+
+  # Ensure test files are valid
+  - repo: local
+    hooks:
+      - id: test-parser
+        name: Run Parser Tests
+        entry: node tests/test_parser.js
+        language: system
+        pass_filenames: false
+        files: '(popup\.js|background\.js|tests/test_parser\.js|tests/data/.*\.(ics|vcs))$'
+
+# Configuration
+default_language_version:
+  python: python3
+  node: system
+
+# Run on all files or just staged
+default_stages: [pre-commit]
+
+# Fail fast - stop on first failure
+fail_fast: false
+
+# Minimum pre-commit version
+minimum_pre_commit_version: '2.20.0'
