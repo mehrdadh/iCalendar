@@ -3,6 +3,8 @@
 A Chrome extension that reads .ics and .vcs calendar files and creates Google Calendar events from them with a
 beautiful, modern interface.
 
+**[📦 Install from Chrome Web Store](https://chromewebstore.google.com/detail/icalendar/dbbbojhlacnjcejnlfhbignjignbpgfd)**
+
 ## Features
 
 - 📁 **Drag and drop** .ics or .vcs files onto the extension popup
@@ -20,11 +22,21 @@ beautiful, modern interface.
 
 ## Installation
 
-### Step 1: Install the Extension
+### Option 1: Install from Chrome Web Store (Recommended)
+
+Install the extension directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/icalendar/dbbbojhlacnjcejnlfhbignjignbpgfd).
+
+The extension is ready to use out of the box with pre-configured OAuth credentials!
+
+### Option 2: Development Installation (Load Unpacked)
+
+For developers or those who want to customize the extension:
+
+#### Step 1: Install the Extension
 
 No hard-coded credentials required! Each user brings their own OAuth credentials.
 
-### Step 2: Load the Extension in Chrome
+#### Step 2: Load the Extension in Chrome
 
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable **"Developer mode"** (toggle in top right)
@@ -32,7 +44,7 @@ No hard-coded credentials required! Each user brings their own OAuth credentials
 4. Select the extension directory
 5. Copy the **Extension ID** (you'll need it for OAuth setup)
 
-### Step 3: Set Up Your Google OAuth (5 minutes)
+#### Step 3: Set Up Your Google OAuth (5 minutes)
 
 See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructions.
 
@@ -44,7 +56,7 @@ See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructio
 4. Create OAuth Client ID (type: Web application)
 5. Copy your Client ID
 
-### Step 4: Configure the Extension
+#### Step 4: Configure the Extension
 
 1. Open `popup.js` in your code editor
 2. Find line ~16: `const GOOGLE_CLIENT_ID = '...'`
@@ -52,7 +64,7 @@ See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructio
 4. Save the file
 5. Reload the extension in Chrome
 
-### Step 5: Use the Extension
+## Usage
 
 1. Click the extension icon - **You'll be prompted to authorize on first use**
 2. Sign in with Google and grant calendar permissions
