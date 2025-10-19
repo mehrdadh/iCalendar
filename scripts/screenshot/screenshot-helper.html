@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screenshot Helper - Interactive Demo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+      /* Helper page styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+      }
+
+      .helper-container {
+        max-width: 1300px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .info {
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #ffc107;
+      }
+
+      .screenshot-frame {
+        width: 640px;
+        height: 400px;
+        border: 2px solid #333;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+        position: relative;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      #popup-iframe {
+        border: none;
+        width: 400px;
+        height: 600px;
+        background: transparent;
+      }
+
+      .demo-controls {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .demo-controls h2 {
+        color: #4285f4;
+        margin-bottom: 15px;
+      }
+
+      .demo-controls button {
+        background: #4285f4;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 5px 10px 5px 0;
+        transition: background 0.2s;
+      }
+
+      .demo-controls button:hover {
+        background: #357ae8;
+      }
+
+      .instructions {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .instructions h2 {
+        margin-top: 0;
+        color: #4285f4;
+      }
+
+      .instructions h3 {
+        margin-top: 20px;
+        color: #333;
+      }
+
+      .instructions ul,
+      .instructions ol {
+        line-height: 1.8;
+        margin-left: 20px;
+      }
+
+      .note {
+        background: #e3f2fd;
+        padding: 12px;
+        border-radius: 5px;
+        margin: 10px 0;
+        border-left: 4px solid #2196f3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="helper-container">
+      <h1>📸 Interactive Screenshot Helper</h1>
+
+      <div class="info">
+        <strong>✨ Fully Interactive Demo:</strong> This loads the actual popup with a fake "John
+        Smith" account. You can drag & drop ICS files, select calendars, and create events - all
+        without needing real authentication!
+      </div>
+
+      <div class="screenshot-frame">
+        <iframe id="popup-iframe"></iframe>
+      </div>
+
+      <div class="demo-controls">
+        <h2>🎬 Demo Actions</h2>
+        <button onclick="loadSampleEvent()">📅 Load Sample Event</button>
+        <button onclick="showSuccess()">✅ Show Success Message</button>
+        <button onclick="resetDemo()">🔄 Reset Demo</button>
+        <button onclick="openCalendarDropdown()">📋 Open Calendar Dropdown</button>
+        <button onclick="captureScreenshot()" style="background: #34a853">
+          📸 Save Screenshot (PNG)
+        </button>
+        <div class="note">
+          <strong>Tip:</strong> You can also drag & drop any .ics/.vcs file directly into the popup!
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h2>📋 How to Take Screenshots</h2>
+
+        <h3>Using This Interactive Demo:</h3>
+        <ol>
+          <li>Use the demo buttons above to navigate through different states</li>
+          <li>
+            Click the <strong>📸 Save Screenshot (PNG)</strong> button to capture the current view
+          </li>
+          <li>
+            The frame is 640×400px - screenshots are saved at 2560×1600px (4x scale for ultra-high
+            quality)
+          </li>
+          <li>
+            Scroll within the frame to position the content, then click screenshot to capture that
+            view
+          </li>
+        </ol>
+
+        <h3>📸 Recommended Screenshots:</h3>
+        <ol>
+          <li><strong>Initial State:</strong> Clean interface with drop zone</li>
+          <li>
+            <strong>Calendar Selector:</strong> Show the calendar dropdown (click button above)
+          </li>
+          <li><strong>Event Loaded:</strong> Click "Load Sample Event" to show parsed event</li>
+          <li><strong>Success State:</strong> Click "Show Success Message" after loading event</li>
+        </ol>
+
+        <h3>💡 Tips:</h3>
+        <ul>
+          <li>✅ The demo shows realistic data with fake Google account "John Smith"</li>
+          <li>✅ All interactions work including drag & drop</li>
+          <li>✅ Use consistent sample data across screenshots</li>
+          <li>✅ Reset between states to show different workflows</li>
+          <li>
+            ✅ This loads the actual popup.html - any changes you make will automatically reflect
+            here!
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // ===== MOCK CHROME APIs =====
+      const mockChromeCode = `
+        window.chrome = {
+          runtime: {
+            getManifest: () => ({
+              oauth2: {
+                client_id: 'mock-client-id.apps.googleusercontent.com',
+              },
+            }),
+            onMessage: {
+              addListener: fn => {
+                window._chromeMessageListener = fn;
+              },
+            },
+            sendMessage: (message, callback) => {
+              setTimeout(() => {
+                if (message.action === 'requestAuthorization') {
+                  callback({ success: true });
+                } else if (message.action === 'getCalendars') {
+                  callback({
+                    success: true,
+                    calendars: [
+                      { id: 'primary', summary: 'John Smith', primary: true },
+                      { id: 'work', summary: 'Work Calendar' },
+                      { id: 'personal', summary: 'Personal Events' },
+                      { id: 'family', summary: 'Family Calendar' },
+                    ],
+                  });
+                } else if (message.action === 'createCalendarEvent') {
+                  setTimeout(() => {
+                    callback({
+                      success: true,
+                      eventId: 'mock-event-id-' + Date.now(),
+                    });
+                  }, 1000);
+                }
+              }, 300);
+            },
+            lastError: null,
+          },
+          storage: {
+            local: {
+              _data: {
+                isAuthorized: true,
+                hasPromptedAuth: true,
+                calendars: [
+                  { id: 'primary', summary: 'John Smith', primary: true },
+                  { id: 'work', summary: 'Work Calendar' },
+                  { id: 'personal', summary: 'Personal Events' },
+                  { id: 'family', summary: 'Family Calendar' },
+                ],
+              },
+              get: function(keys) {
+                return new Promise(resolve => {
+                  const result = {};
+                  const keyArray = Array.isArray(keys) ? keys : [keys];
+                  keyArray.forEach(key => {
+                    if (window.chrome.storage.local._data[key] !== undefined) {
+                      result[key] = window.chrome.storage.local._data[key];
+                    }
+                  });
+                  resolve(result);
+                });
+              },
+              set: function(data) {
+                return new Promise(resolve => {
+                  Object.assign(window.chrome.storage.local._data, data);
+                  resolve();
+                });
+              },
+              remove: function(keys) {
+                return new Promise(resolve => {
+                  const keyArray = Array.isArray(keys) ? keys : [keys];
+                  keyArray.forEach(key => {
+                    delete window.chrome.storage.local._data[key];
+                  });
+                  resolve();
+                });
+              },
+              clear: function() {
+                return new Promise(resolve => {
+                  window.chrome.storage.local._data = {
+                    isAuthorized: true,
+                    hasPromptedAuth: true,
+                    calendars: [
+                      { id: 'primary', summary: 'John Smith', primary: true },
+                      { id: 'work', summary: 'Work Calendar' },
+                      { id: 'personal', summary: 'Personal Events' },
+                      { id: 'family', summary: 'Family Calendar' },
+                    ],
+                  };
+                  resolve();
+                });
+              },
+            },
+          },
+          identity: {
+            getAuthToken: (options, callback) => {
+              setTimeout(() => callback('mock-token-' + Date.now()), 100);
+            },
+            removeCachedAuthToken: (options, callback) => {
+              setTimeout(() => callback(), 100);
+            },
+            clearAllCachedAuthTokens: callback => {
+              setTimeout(() => callback(), 100);
+            },
+          },
+        };
+        console.log('✓ Mock Chrome API loaded');
+      `;
+
+      // Load popup HTML and inject mock Chrome API
+      async function loadPopup() {
+        try {
+          console.log('Starting to load popup files...');
+
+          // Fetch all necessary files including the logo
+          const [htmlResponse, jsResponse, cssResponse, logoResponse] = await Promise.all([
+            fetch('../../popup.html'),
+            fetch('../../popup.js'),
+            fetch('../../styles.css'),
+            fetch('../../images/logo_512x512.png'),
+          ]);
+
+          console.log('Files fetched successfully');
+
+          const html = await htmlResponse.text();
+          const js = await jsResponse.text();
+          const css = await cssResponse.text();
+          const logoBlob = await logoResponse.blob();
+
+          console.log('Files read successfully');
+          console.log('HTML length:', html.length);
+          console.log('JS length:', js.length);
+          console.log('CSS length:', css.length);
+
+          // Convert logo to data URL
+          const logoDataUrl = await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(logoBlob);
+          });
+
+          console.log('Logo converted to data URL');
+
+          // Create a new document with inline styles and scripts
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          // Replace stylesheet with inline style
+          const styleLink = doc.querySelector('link[rel="stylesheet"]');
+          if (styleLink) {
+            const styleTag = doc.createElement('style');
+            styleTag.textContent = css;
+            styleLink.replaceWith(styleTag);
+          }
+
+          // Replace script src with inline scripts
+          const scriptTag = doc.querySelector('script[src="popup.js"]');
+          if (scriptTag) {
+            // First inject mock chrome
+            const mockScript = doc.createElement('script');
+            mockScript.textContent = mockChromeCode;
+            scriptTag.parentNode.insertBefore(mockScript, scriptTag);
+
+            // Then the actual popup.js
+            const popupScript = doc.createElement('script');
+            popupScript.textContent = js;
+            scriptTag.replaceWith(popupScript);
+          }
+
+          // Replace image src with data URL
+          const logoImg = doc.querySelector('img[src="images/logo_512x512.png"]');
+          if (logoImg) {
+            logoImg.src = logoDataUrl;
+          }
+
+          // Serialize the document
+          const modifiedHtml = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+
+          console.log('Modified HTML length:', modifiedHtml.length);
+
+          // Create a Blob and use it for the iframe
+          const blob = new Blob([modifiedHtml], { type: 'text/html' });
+          const blobUrl = URL.createObjectURL(blob);
+
+          const iframe = document.getElementById('popup-iframe');
+          iframe.src = blobUrl;
+
+          console.log('✓ Popup loaded with mock Chrome API');
+
+          // Debug: Check if iframe loaded
+          iframe.addEventListener('load', () => {
+            console.log('✓ Iframe loaded');
+            try {
+              console.log('Iframe body:', iframe.contentWindow.document.body);
+              console.log('Iframe chrome:', iframe.contentWindow.chrome);
+            } catch (e) {
+              console.error('Cannot access iframe:', e);
+            }
+          });
+        } catch (e) {
+          console.error('Error loading popup:', e);
+          const iframe = document.getElementById('popup-iframe');
+          const errorBlob = new Blob(
+            [
+              '<div style="padding: 20px; color: red;">Error loading popup: ' +
+                e.message +
+                '</div>',
+            ],
+            { type: 'text/html' }
+          );
+          iframe.src = URL.createObjectURL(errorBlob);
+        }
+      }
+
+      // Load popup when page loads
+      window.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM loaded, starting popup load...');
+        loadPopup();
+      });
+
+      // ===== DEMO CONTROL FUNCTIONS =====
+      function getIframeWindow() {
+        return document.getElementById('popup-iframe').contentWindow;
+      }
+
+      function loadSampleEvent() {
+        const sampleICS = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Sample Corp//Sample Calendar//EN
+BEGIN:VEVENT
+UID:sample-event-${Date.now()}@example.com
+DTSTAMP:20251019T120000Z
+DTSTART:20251025T140000Z
+DTEND:20251025T150000Z
+SUMMARY:Team Meeting - Q4 Planning
+DESCRIPTION:Quarterly planning session with the team
+LOCATION:Conference Room A
+END:VEVENT
+END:VCALENDAR`;
+
+        const blob = new Blob([sampleICS], { type: 'text/calendar' });
+        const file = new File([blob], 'sample-event.ics', { type: 'text/calendar' });
+
+        setTimeout(() => {
+          try {
+            const iframeWin = getIframeWindow();
+            if (iframeWin.handleFiles) {
+              iframeWin.handleFiles([file]);
+            } else {
+              console.error('handleFiles not found in iframe');
+            }
+          } catch (e) {
+            console.error('Error loading sample event:', e);
+          }
+        }, 500);
+      }
+
+      function showSuccess() {
+        setTimeout(() => {
+          try {
+            const iframeWin = getIframeWindow();
+            const btn = iframeWin.document.getElementById('createEventBtn');
+            if (btn && iframeWin.currentICSData) {
+              btn.click();
+            } else {
+              alert('Please load a sample event first!');
+            }
+          } catch (e) {
+            console.error('Error showing success:', e);
+            alert('Please load a sample event first!');
+          }
+        }, 100);
+      }
+
+      function resetDemo() {
+        location.reload();
+      }
+
+      function openCalendarDropdown() {
+        setTimeout(() => {
+          try {
+            const iframeWin = getIframeWindow();
+            const dropdown = iframeWin.document.getElementById('calendarDropdown');
+            if (dropdown) {
+              dropdown.focus();
+              dropdown.size = 4;
+              setTimeout(() => {
+                dropdown.size = 1;
+              }, 3000);
+            }
+          } catch (e) {
+            console.error('Error opening dropdown:', e);
+          }
+        }, 100);
+      }
+
+      async function captureScreenshot() {
+        try {
+          const frame = document.querySelector('.screenshot-frame');
+          const iframe = document.getElementById('popup-iframe');
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+          console.log('Capturing iframe content...');
+
+          // Get the scroll position of the frame
+          const frameScrollTop = frame.scrollTop;
+          const frameScrollLeft = frame.scrollLeft;
+
+          console.log('Frame scroll position:', frameScrollLeft, frameScrollTop);
+
+          // Capture the iframe's body content
+          const fullCanvas = await html2canvas(iframeDoc.body, {
+            scale: 4, // Ultra-high quality (4x resolution)
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true,
+            allowTaint: true,
+          });
+
+          console.log('Full canvas size:', fullCanvas.width, 'x', fullCanvas.height);
+
+          // Now we need to crop to show what's visible in the 640x400 frame
+          // The iframe is centered in the frame, so calculate the visible portion
+          const iframeRect = iframe.getBoundingClientRect();
+          const frameRect = frame.getBoundingClientRect();
+
+          // Calculate what part of the iframe is visible in the frame
+          const visibleLeft = Math.max(0, frameRect.left - iframeRect.left + frameScrollLeft);
+          const visibleTop = Math.max(0, frameRect.top - iframeRect.top + frameScrollTop);
+          const visibleWidth = Math.min(640, iframeRect.width);
+          const visibleHeight = Math.min(400, iframeRect.height);
+
+          console.log('Visible area:', visibleLeft, visibleTop, visibleWidth, visibleHeight);
+
+          // Create output canvas
+          const outputCanvas = document.createElement('canvas');
+          outputCanvas.width = 640 * 4; // 2560 pixels
+          outputCanvas.height = 400 * 4; // 1600 pixels
+          const ctx = outputCanvas.getContext('2d');
+
+          // Fill with white background
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+
+          // Calculate centering offset for the popup in the frame
+          const offsetX = (640 - Math.min(400, iframeRect.width)) / 2;
+          const offsetY = 0; // Top aligned
+
+          // Draw the visible portion of the iframe content
+          ctx.drawImage(
+            fullCanvas,
+            visibleLeft * 4,
+            visibleTop * 4,
+            visibleWidth * 4,
+            visibleHeight * 4,
+            offsetX * 4,
+            offsetY * 4,
+            visibleWidth * 4,
+            visibleHeight * 4
+          );
+
+          console.log('Drawing at offset:', offsetX * 4, offsetY * 4);
+
+          // Convert to blob and download
+          outputCanvas.toBlob(
+            blob => {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+              link.download = `icalendar-screenshot-${timestamp}.png`;
+              link.href = url;
+              link.click();
+              URL.revokeObjectURL(url);
+              console.log('✓ Screenshot saved! (640×400 at 4x scale = 2560×1600 pixels)');
+            },
+            'image/png',
+            1.0
+          );
+        } catch (e) {
+          console.error('Error capturing screenshot:', e);
+          alert('Error capturing screenshot: ' + e.message);
+        }
+      }
+    </script>
+  </body>
+</html>
