@@ -84,7 +84,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: true, token: token });
       })
       .catch(error => {
-        console.error('Authorization failed:', error);
+        console.log('Authorization not completed:', error.message);
         sendResponse({ success: false, error: error.message });
       });
     return true; // Keep channel open for async response
@@ -99,7 +99,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: true, calendars: calendars });
       })
       .catch(error => {
-        console.error('Error getting calendars:', error);
+        console.log('Could not get calendars:', error.message);
         sendResponse({ success: false, error: error.message });
       });
     return true; // Keep channel open for async response
@@ -186,8 +186,9 @@ async function getAccessToken(clientId, forceAuth = false, sendStatus = null) {
       return tokenData.accessToken;
     } catch (error) {
       // Silent auth failed - this is expected when user needs to interact
-      console.log('⚠ Silent authentication failed (expected):', error.message);
-      console.log('→ Falling back to interactive authentication...');
+      console.log(
+        'Silent authentication not available (expected), falling back to interactive auth'
+      );
       // Fall through to interactive authentication below
     }
   }
@@ -215,7 +216,7 @@ async function getAccessToken(clientId, forceAuth = false, sendStatus = null) {
       console.log('Stored user email for login_hint:', userEmail);
     }
   } catch (error) {
-    console.log('Could not fetch user email (non-critical):', error.message);
+    console.log('Could not fetch user email (optional, non-critical):', error.message);
   }
 
   return tokenData.accessToken;
@@ -263,11 +264,11 @@ async function authenticateWithOAuth2(clientId, interactive = true) {
       redirectUrl => {
         if (chrome.runtime.lastError) {
           const errorMsg = chrome.runtime.lastError.message;
+          // Both silent auth failure and user cancellation are expected user flows
           if (!interactive) {
-            // For silent auth, this is expected when user needs to interact
-            console.log('Silent auth failed (Chrome error):', errorMsg);
+            console.log('Silent auth unavailable:', errorMsg);
           } else {
-            console.error('Interactive auth error:', errorMsg);
+            console.log('Authentication not completed:', errorMsg);
           }
           reject(new Error(errorMsg));
           return;
@@ -275,7 +276,7 @@ async function authenticateWithOAuth2(clientId, interactive = true) {
 
         if (!redirectUrl) {
           const errorMsg = 'No redirect URL received';
-          console.error(errorMsg);
+          console.log(errorMsg);
           reject(new Error(errorMsg));
           return;
         }
@@ -292,11 +293,11 @@ async function authenticateWithOAuth2(clientId, interactive = true) {
           const error = params.get('error');
           if (error) {
             const errorDesc = params.get('error_description') || error;
+            // Both silent auth and interactive cancellation are expected user flows
             if (!interactive) {
-              // For silent auth, these errors are expected
-              console.log('Silent auth OAuth error:', error, '-', errorDesc);
+              console.log('Silent auth not available:', error);
             } else {
-              console.error('Interactive auth OAuth error:', error, '-', errorDesc);
+              console.log('Authentication not completed:', error, '-', errorDesc);
             }
             reject(new Error(`OAuth error: ${error} - ${errorDesc}`));
             return;
@@ -338,11 +339,9 @@ async function getCalendarList(clientId) {
     });
 
     if (!response.ok) {
-      console.error('Failed to get calendar list:', response.status, response.statusText);
-
       // If auth error, try with fresh token
       if (response.status === 401 || response.status === 403) {
-        console.log('Auth error, retrying with fresh token...');
+        console.log('Authentication issue, retrying with fresh token...');
         const newAccessToken = await getAccessToken(clientId, true);
 
         const retryResponse = await fetch(
@@ -357,14 +356,16 @@ async function getCalendarList(clientId) {
         );
 
         if (!retryResponse.ok) {
-          throw new Error(`Failed to get calendar list: ${retryResponse.status}`);
+          const retryError = await retryResponse.text();
+          throw new Error(`Failed to get calendar list: ${retryResponse.status} - ${retryError}`);
         }
 
         const retryData = await retryResponse.json();
         return retryData.items || [];
       }
 
-      throw new Error(`Failed to get calendar list: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`Failed to get calendar list: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -410,15 +411,12 @@ async function createCalendarEvent(
     );
 
     if (!response.ok) {
-      console.error('API request failed with status:', response.status, response.statusText);
-
       // Check if it's an auth error (401 or 403)
       if (response.status === 401 || response.status === 403) {
-        console.log('Auth error detected, checking if we need to re-authenticate...');
+        console.log('Authentication issue detected, checking token validity...');
 
         try {
           const errorData = await response.json();
-          console.error('API error response:', errorData);
 
           // Check if it's a permission/auth issue
           const errorMessage = errorData.error?.message || '';
@@ -437,7 +435,7 @@ async function createCalendarEvent(
 
           throw new Error(errorMessage || `API request failed: ${response.status}`);
         } catch (parseError) {
-          console.error('Could not parse error response:', parseError);
+          // Could not parse response, use default error
         }
       }
 
@@ -445,12 +443,15 @@ async function createCalendarEvent(
 
       try {
         const errorData = await response.json();
-        console.error('API error response:', errorData);
         errorMessage = errorData.error?.message || errorMessage;
       } catch (parseError) {
-        console.error('Could not parse error response:', parseError);
-        const errorText = await response.text();
-        console.error('Error response text:', errorText);
+        // Could not parse JSON, try text
+        try {
+          const errorText = await response.text();
+          if (errorText) errorMessage += `: ${errorText}`;
+        } catch (textError) {
+          // Use default error message
+        }
       }
 
       throw new Error(errorMessage);

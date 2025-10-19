@@ -116,7 +116,7 @@ async function promptForAuthorization() {
         },
         response => {
           if (chrome.runtime.lastError) {
-            console.error('Authorization error:', chrome.runtime.lastError);
+            console.log('Authorization not completed:', chrome.runtime.lastError);
             resolve({ success: false, error: chrome.runtime.lastError.message });
             return;
           }
@@ -146,7 +146,7 @@ async function promptForAuthorization() {
       showError('Authorization was not completed. You can try again later.');
     }
   } catch (error) {
-    console.error('Error prompting for authorization:', error);
+    console.log('Authorization not completed:', error.message);
     await chrome.storage.local.set({
       hasPromptedAuth: true,
       isAuthorized: false,
@@ -188,7 +188,7 @@ async function loadCalendars() {
         },
         response => {
           if (chrome.runtime.lastError) {
-            console.error('Error loading calendars:', chrome.runtime.lastError);
+            console.log('Could not load calendars:', chrome.runtime.lastError);
             resolve({ success: false, error: chrome.runtime.lastError.message });
             return;
           }
@@ -206,7 +206,7 @@ async function loadCalendars() {
       // Save calendars to storage
       await chrome.storage.local.set({ calendars: response.calendars });
     } else {
-      console.error('Failed to load calendars:', response?.error);
+      console.log('Could not load calendars, using default:', response?.error);
       // If no cache and fetch failed, keep default
       if (!stored.calendars || stored.calendars.length === 0) {
         calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
@@ -351,7 +351,7 @@ function displayICSAttributes(fileName, attributes, saveToStorage = true) {
         console.log('✓ Event saved to storage');
       })
       .catch(error => {
-        console.error('Error saving event data:', error);
+        console.log('Could not save event data to cache:', error.message);
       });
   } else if (!saveToStorage) {
     console.log('Skipping save to storage (restoring from cache)');
@@ -481,7 +481,7 @@ async function clearEventDisplay() {
       const check = await chrome.storage.local.get(['eventData', 'fileName']);
       console.log('Storage after clear:', check);
     } catch (error) {
-      console.error('Error clearing event data:', error);
+      console.log('Could not clear event data from cache:', error.message);
     }
   }
 }
