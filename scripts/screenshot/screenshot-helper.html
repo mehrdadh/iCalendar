@@ -130,6 +130,17 @@
         without needing real authentication!
       </div>
 
+      <div class="note" style="margin-bottom: 20px">
+        <strong>📁 Screenshot Organization:</strong> Screenshots will download to your browser's
+        default Downloads folder. After capturing, move them to
+        <code>releases/screenshots/</code> in your project directory for organization.
+      </div>
+
+      <div id="loading-indicator" class="info" style="margin-bottom: 20px; background: #fff3cd">
+        <strong>⏳ Loading popup...</strong> Please wait for the iframe to load before using demo
+        actions.
+      </div>
+
       <div class="screenshot-frame">
         <iframe id="popup-iframe"></iframe>
       </div>
@@ -175,6 +186,17 @@
           </li>
           <li><strong>Event Loaded:</strong> Click "Load Sample Event" to show parsed event</li>
           <li><strong>Success State:</strong> Click "Show Success Message" after loading event</li>
+        </ol>
+
+        <h3>📁 Organizing Screenshots:</h3>
+        <ol>
+          <li>
+            Screenshots download to your browser's Downloads folder by default (browser security
+            restriction)
+          </li>
+          <li>Create the directory: <code>mkdir -p releases/screenshots</code></li>
+          <li>Move downloaded screenshots to <code>releases/screenshots/</code></li>
+          <li>Rename files as needed for your documentation</li>
         </ol>
 
         <h3>💡 Tips:</h3>
@@ -308,24 +330,28 @@
         try {
           console.log('Starting to load popup files...');
 
-          // Fetch all necessary files including the logo
-          const [htmlResponse, jsResponse, cssResponse, logoResponse] = await Promise.all([
-            fetch('../../popup.html'),
-            fetch('../../popup.js'),
-            fetch('../../styles.css'),
-            fetch('../../images/logo_512x512.png'),
-          ]);
+          // Fetch all necessary files including the logo and parser
+          const [htmlResponse, parserResponse, jsResponse, cssResponse, logoResponse] =
+            await Promise.all([
+              fetch('../../popup.html'),
+              fetch('../../parser.js'),
+              fetch('../../popup.js'),
+              fetch('../../styles.css'),
+              fetch('../../images/logo_512x512.png'),
+            ]);
 
           console.log('Files fetched successfully');
 
           const html = await htmlResponse.text();
+          const parserJs = await parserResponse.text();
           const js = await jsResponse.text();
           const css = await cssResponse.text();
           const logoBlob = await logoResponse.blob();
 
           console.log('Files read successfully');
           console.log('HTML length:', html.length);
-          console.log('JS length:', js.length);
+          console.log('Parser.js length:', parserJs.length);
+          console.log('Popup.js length:', js.length);
           console.log('CSS length:', css.length);
 
           // Convert logo to data URL
@@ -345,22 +371,73 @@
           const styleLink = doc.querySelector('link[rel="stylesheet"]');
           if (styleLink) {
             const styleTag = doc.createElement('style');
-            styleTag.textContent = css;
+            // Add the original CSS plus overrides for screenshot mode
+            styleTag.textContent =
+              css +
+              `
+              /* Screenshot mode overrides */
+              .container {
+                padding: 15px 20px !important;
+                min-height: auto !important;
+                justify-content: flex-start !important;
+              }
+            `;
             styleLink.replaceWith(styleTag);
           }
 
           // Replace script src with inline scripts
-          const scriptTag = doc.querySelector('script[src="popup.js"]');
-          if (scriptTag) {
+          const parserScriptTag = doc.querySelector('script[src="parser.js"]');
+          const popupScriptTag = doc.querySelector('script[src="popup.js"]');
+
+          if (parserScriptTag && popupScriptTag) {
             // First inject mock chrome
             const mockScript = doc.createElement('script');
             mockScript.textContent = mockChromeCode;
-            scriptTag.parentNode.insertBefore(mockScript, scriptTag);
+            parserScriptTag.parentNode.insertBefore(mockScript, parserScriptTag);
+
+            // Then inject parser.js
+            const parserScript = doc.createElement('script');
+            parserScript.textContent = parserJs;
+            parserScriptTag.replaceWith(parserScript);
 
             // Then the actual popup.js
             const popupScript = doc.createElement('script');
             popupScript.textContent = js;
-            scriptTag.replaceWith(popupScript);
+            popupScriptTag.replaceWith(popupScript);
+
+            // Add a helper script to expose functions for demo
+            const helperScript = doc.createElement('script');
+            helperScript.textContent = `
+              // Wait for DOM to be ready
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupDemo);
+              } else {
+                setupDemo();
+              }
+
+              function setupDemo() {
+                console.log('Setting up demo helper functions...');
+
+                // Expose handleFiles globally for demo purposes
+                window.demoLoadFile = function(file) {
+                  console.log('demoLoadFile called with file:', file.name);
+
+                  if (typeof handleFiles === 'function') {
+                    console.log('Calling handleFiles...');
+                    handleFiles([file]);
+                  } else if (typeof readCalendarFile === 'function') {
+                    console.log('Calling readCalendarFile...');
+                    readCalendarFile(file);
+                  } else {
+                    console.error('File handling functions not found');
+                    console.log('Available functions:', Object.keys(window));
+                  }
+                };
+
+                console.log('✓ Demo helper functions ready');
+              }
+            `;
+            popupScript.after(helperScript);
           }
 
           // Replace image src with data URL
@@ -389,6 +466,18 @@
             try {
               console.log('Iframe body:', iframe.contentWindow.document.body);
               console.log('Iframe chrome:', iframe.contentWindow.chrome);
+
+              // Mark iframe as ready for demo actions
+              window.iframeReady = true;
+
+              // Update loading indicator
+              const loadingIndicator = document.getElementById('loading-indicator');
+              if (loadingIndicator) {
+                loadingIndicator.style.background = '#d4edda';
+                loadingIndicator.style.borderColor = '#28a745';
+                loadingIndicator.innerHTML =
+                  '<strong>✅ Ready!</strong> You can now use the demo actions below.';
+              }
             } catch (e) {
               console.error('Cannot access iframe:', e);
             }
@@ -420,6 +509,11 @@
       }
 
       function loadSampleEvent() {
+        if (!window.iframeReady) {
+          alert('Please wait for the iframe to fully load, then try again.');
+          return;
+        }
+
         const sampleICS = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Sample Corp//Sample Calendar//EN
@@ -434,38 +528,45 @@ LOCATION:Conference Room A
 END:VEVENT
 END:VCALENDAR`;
 
-        const blob = new Blob([sampleICS], { type: 'text/calendar' });
-        const file = new File([blob], 'sample-event.ics', { type: 'text/calendar' });
+        try {
+          const iframeWin = getIframeWindow();
 
-        setTimeout(() => {
-          try {
-            const iframeWin = getIframeWindow();
-            if (iframeWin.handleFiles) {
-              iframeWin.handleFiles([file]);
-            } else {
-              console.error('handleFiles not found in iframe');
-            }
-          } catch (e) {
-            console.error('Error loading sample event:', e);
+          // Create file
+          const blob = new Blob([sampleICS], { type: 'text/calendar' });
+          const file = new File([blob], 'sample-event.ics', { type: 'text/calendar' });
+
+          // Use the exposed demo function
+          if (typeof iframeWin.demoLoadFile === 'function') {
+            iframeWin.demoLoadFile(file);
+            console.log('✓ Sample event loaded');
+          } else {
+            console.error('demoLoadFile function not found in iframe');
+            alert('Demo function not available. Please refresh the page and try again.');
           }
-        }, 500);
+        } catch (e) {
+          console.error('Error loading sample event:', e);
+          alert('Error loading sample event: ' + e.message);
+        }
       }
 
       function showSuccess() {
-        setTimeout(() => {
-          try {
-            const iframeWin = getIframeWindow();
-            const btn = iframeWin.document.getElementById('createEventBtn');
-            if (btn && iframeWin.currentICSData) {
-              btn.click();
-            } else {
-              alert('Please load a sample event first!');
-            }
-          } catch (e) {
-            console.error('Error showing success:', e);
+        if (!window.iframeReady) {
+          alert('Please wait for the iframe to fully load, then try again.');
+          return;
+        }
+
+        try {
+          const iframeWin = getIframeWindow();
+          const btn = iframeWin.document.getElementById('createEventBtn');
+          if (btn && iframeWin.currentICSData) {
+            btn.click();
+          } else {
             alert('Please load a sample event first!');
           }
-        }, 100);
+        } catch (e) {
+          console.error('Error showing success:', e);
+          alert('Please load a sample event first!');
+        }
       }
 
       function resetDemo() {
@@ -473,21 +574,24 @@ END:VCALENDAR`;
       }
 
       function openCalendarDropdown() {
-        setTimeout(() => {
-          try {
-            const iframeWin = getIframeWindow();
-            const dropdown = iframeWin.document.getElementById('calendarDropdown');
-            if (dropdown) {
-              dropdown.focus();
-              dropdown.size = 4;
-              setTimeout(() => {
-                dropdown.size = 1;
-              }, 3000);
-            }
-          } catch (e) {
-            console.error('Error opening dropdown:', e);
+        if (!window.iframeReady) {
+          alert('Please wait for the iframe to fully load, then try again.');
+          return;
+        }
+
+        try {
+          const iframeWin = getIframeWindow();
+          const dropdown = iframeWin.document.getElementById('calendarDropdown');
+          if (dropdown) {
+            dropdown.focus();
+            dropdown.size = 4;
+            setTimeout(() => {
+              dropdown.size = 1;
+            }, 3000);
           }
-        }, 100);
+        } catch (e) {
+          console.error('Error opening dropdown:', e);
+        }
       }
 
       async function captureScreenshot() {
@@ -563,11 +667,22 @@ END:VCALENDAR`;
               const url = URL.createObjectURL(blob);
               const link = document.createElement('a');
               const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-              link.download = `icalendar-screenshot-${timestamp}.png`;
+              const filename = `icalendar-screenshot-${timestamp}.png`;
+              link.download = filename;
               link.href = url;
               link.click();
               URL.revokeObjectURL(url);
               console.log('✓ Screenshot saved! (640×400 at 4x scale = 2560×1600 pixels)');
+              console.log(`📁 File: ${filename}`);
+              console.log(
+                '📁 Move to: releases/screenshots/ (create with: mkdir -p releases/screenshots)'
+              );
+              alert(
+                `✅ Screenshot saved!\n\n` +
+                  `File: ${filename}\n` +
+                  `Downloaded to: Your browser's Downloads folder\n\n` +
+                  `Next step: Move to releases/screenshots/`
+              );
             },
             'image/png',
             1.0
