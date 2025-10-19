@@ -4,8 +4,6 @@ const ENABLE_EVENT_CACHING = false; // Set to false to disable event persistence
 // Verify script is loaded
 console.log('=== POPUP.JS LOADED ===');
 console.log('Extension initialized at:', new Date().toISOString());
-// console.error('ERROR TEST - If you see this, console is working!');
-// console.warn('WARNING TEST - Console should show this!');
 
 // Get DOM elements
 const dropZone = document.getElementById('dropZone');
@@ -72,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   } catch (error) {
-    console.error('Error in DOMContentLoaded:', error);
+    console.log('Error in DOMContentLoaded:', error);
   }
 });
 
@@ -97,7 +95,7 @@ async function checkAndRequestAuthorization() {
     const updated = await chrome.storage.local.get(['isAuthorized']);
     return updated.isAuthorized || false;
   } catch (error) {
-    console.error('Error checking authorization:', error);
+    console.log('Error checking authorization:', error);
     return false;
   }
 }
@@ -212,7 +210,7 @@ async function loadCalendars() {
       }
     }
   } catch (error) {
-    console.error('Error in loadCalendars:', error);
+    console.log('Error in loadCalendars:', error);
   }
 }
 
@@ -519,7 +517,7 @@ createEventBtn.addEventListener('click', async () => {
       response => {
         // Check for runtime errors
         if (chrome.runtime.lastError) {
-          console.error('Runtime error:', chrome.runtime.lastError);
+          console.log('Runtime error:', chrome.runtime.lastError);
           createEventBtn.disabled = false;
           createEventBtn.textContent = BUTTON_TEXT_DEFAULT;
           showError(`Connection error: ${chrome.runtime.lastError.message}`);
@@ -552,13 +550,13 @@ createEventBtn.addEventListener('click', async () => {
           }, 2000); // Show success for 2 seconds
         } else {
           const errorMsg = response?.error || 'Unknown error occurred';
-          console.error('Failed to create event:', errorMsg);
+          console.log('Failed to create event:', errorMsg);
           showError(`Failed to create event: ${errorMsg}`);
         }
       }
     );
   } catch (error) {
-    console.error('Error in createEventBtn click handler:', error);
+    console.log('Error in createEventBtn click handler:', error);
     createEventBtn.disabled = false;
     createEventBtn.textContent = BUTTON_TEXT_DEFAULT;
     showError(`Error: ${error.message}`);

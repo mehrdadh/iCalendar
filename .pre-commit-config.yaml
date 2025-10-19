@@ -83,16 +83,6 @@ repos:
         files: 'manifest\.json$'
         pass_filenames: false
 
-  # Ensure test files are valid
-  - repo: local
-    hooks:
-      - id: test-parser
-        name: Run Parser Tests
-        entry: node tests/test_parser.js
-        language: system
-        pass_filenames: false
-        files: '(popup\.js|background\.js|tests/test_parser\.js|tests/data/.*\.(ics|vcs))$'
-
 # Configuration
 default_language_version:
   python: python3

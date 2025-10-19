@@ -59,7 +59,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: true, result: result });
       })
       .catch(error => {
-        console.error('Error creating event:', error);
+        console.log('Error creating event:', error.message);
         sendResponse({ success: false, error: error.message });
       });
     return true; // Keep channel open for async response
@@ -147,7 +147,7 @@ async function getUserEmail(accessToken) {
     const data = await response.json();
     return data.email || null;
   } catch (error) {
-    console.error('Error fetching user email:', error);
+    console.log('Could not fetch user email (optional):', error.message);
     return null;
   }
 }
@@ -313,7 +313,7 @@ async function authenticateWithOAuth2(clientId, interactive = true) {
           console.log('Access token received, expires in', expiresIn, 'seconds');
           resolve({ accessToken, expiresIn });
         } catch (error) {
-          console.error('Error parsing redirect URL:', error);
+          console.log('Error parsing redirect URL:', error.message);
           reject(error);
         }
       }
@@ -372,7 +372,7 @@ async function getCalendarList(clientId) {
 
     return data.items || [];
   } catch (error) {
-    console.error('Error in getCalendarList:', error);
+    console.log('Error getting calendar list:', error.message);
     throw error;
   }
 }
@@ -460,7 +460,7 @@ async function createCalendarEvent(
     console.log('API success response:', result);
     return result;
   } catch (error) {
-    console.error('Exception in createCalendarEvent:', error);
+    console.log('Error in createCalendarEvent:', error.message);
     throw error;
   }
 }

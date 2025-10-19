@@ -99,7 +99,7 @@
     event.start = parseICSDateTime(dtstart);
     if (!event.start) {
       throw new Error(
-        `Invalid DTSTART format: "${dtstart}". Cannot create calendar event with invalid start time.`
+        `Invalid date format: "${dtstart}". Cannot create calendar event with invalid start time.`
       );
     }
 
@@ -114,7 +114,7 @@
     event.end = parseICSDateTime(dtend);
     if (!event.end) {
       throw new Error(
-        `Invalid DTEND format: "${dtend}". Cannot create calendar event with invalid end time.`
+        `Invalid date format: "${dtend}". Cannot create calendar event with invalid end time.`
       );
     }
 
@@ -164,7 +164,7 @@
 
     // Validate that the string only contains digits, T, and Z
     if (!/^[0-9TZ]+$/.test(icsDateTime)) {
-      console.warn('Invalid date format: contains non-numeric characters:', icsDateTime);
+      console.log('Invalid date format (non-numeric characters):', icsDateTime);
       return null;
     }
 
@@ -176,7 +176,7 @@
 
       // Validate date components
       if (month < 1 || month > 12 || day < 1 || day > 31) {
-        console.warn('Invalid date values:', { year, month, day });
+        console.log('Invalid date values:', { year, month, day });
         return null;
       }
 
@@ -187,7 +187,7 @@
         testDate.getMonth() !== month - 1 ||
         testDate.getDate() !== day
       ) {
-        console.warn('Invalid date (does not exist in calendar):', { year, month, day });
+        console.log('Invalid date (does not exist):', { year, month, day });
         return null;
       }
 
@@ -219,7 +219,7 @@
         second < 0 ||
         second > 59
       ) {
-        console.warn('Invalid date/time values:', { year, month, day, hour, minute, second });
+        console.log('Invalid date/time values:', { year, month, day, hour, minute, second });
         return null;
       }
 
@@ -230,7 +230,7 @@
         testDate.getMonth() !== month - 1 ||
         testDate.getDate() !== day
       ) {
-        console.warn('Invalid date/time (does not exist in calendar):', {
+        console.log('Invalid date/time (does not exist):', {
           year,
           month,
           day,
@@ -262,7 +262,7 @@
       }
     }
 
-    console.warn('Invalid date format: unexpected length or format:', icsDateTime);
+    console.log('Invalid date format (unexpected length or format):', icsDateTime);
     return null;
   }
 
