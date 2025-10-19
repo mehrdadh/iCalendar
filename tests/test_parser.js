@@ -10,163 +10,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// ===== PARSING FUNCTIONS (from popup.js) =====
-
-function parseCalendarFile(content) {
-  // First, unfold lines (both ICS and VCS spec: lines starting with space/tab are continuations)
-  const unfoldedContent = content.replace(/\r\n /g, '').replace(/\n /g, '').replace(/\r /g, '');
-
-  const lines = unfoldedContent.split(/\r\n|\n|\r/);
-  const attributes = {};
-  let inEvent = false;
-  let isVCS = false;
-
-  // Detect if this is a VCS (vCalendar 1.0) or ICS (iCalendar 2.0) file
-  for (const line of lines) {
-    if (line.trim().startsWith('VERSION:1.0')) {
-      isVCS = true;
-      console.log('  📝 Detected VCS (vCalendar 1.0) format');
-      break;
-    } else if (line.trim().startsWith('VERSION:2.0')) {
-      isVCS = false;
-      console.log('  📝 Detected ICS (iCalendar 2.0) format');
-      break;
-    }
-  }
-
-  lines.forEach(line => {
-    line = line.trim();
-
-    if (line === 'BEGIN:VEVENT') {
-      inEvent = true;
-      return;
-    }
-
-    if (line === 'END:VEVENT') {
-      inEvent = false;
-      return;
-    }
-
-    if (!inEvent) return;
-
-    // Parse key-value pairs
-    const colonIndex = line.indexOf(':');
-    if (colonIndex > 0) {
-      const key = line.substring(0, colonIndex);
-      let value = line.substring(colonIndex + 1);
-
-      // Handle special keys with parameters (e.g., DTSTART;TZID=...)
-      const semicolonIndex = key.indexOf(';');
-      const cleanKey = semicolonIndex > 0 ? key.substring(0, semicolonIndex) : key;
-
-      // Decode escape sequences
-      value = value.replace(/\\n/g, '\n');
-      value = value.replace(/\\,/g, ',');
-      value = value.replace(/\\;/g, ';');
-      value = value.replace(/\\\\/g, '\\');
-
-      // Handle VCS-specific fields
-      let mappedKey = cleanKey;
-      if (isVCS) {
-        if (cleanKey === 'AALARM') {
-          mappedKey = 'AALARM';
-        }
-      }
-
-      // Store the attribute
-      if (!attributes[mappedKey]) {
-        attributes[mappedKey] = [];
-      }
-      attributes[mappedKey].push(value);
-    }
-  });
-
-  return attributes;
-}
-
-function convertICSToGoogleCalendarEvent(icsData) {
-  const event = {
-    summary: getFirstValue(icsData, 'SUMMARY') || 'Untitled Event',
-    description: getFirstValue(icsData, 'DESCRIPTION') || '',
-    location: getFirstValue(icsData, 'LOCATION') || '',
-  };
-
-  // Handle start time
-  const dtstart = getFirstValue(icsData, 'DTSTART');
-  if (dtstart) {
-    event.start = parseICSDateTime(dtstart);
-  }
-
-  // Handle end time
-  const dtend = getFirstValue(icsData, 'DTEND');
-  if (dtend) {
-    event.end = parseICSDateTime(dtend);
-  }
-
-  // Handle recurrence rules if present
-  const rrule = getFirstValue(icsData, 'RRULE');
-  if (rrule) {
-    event.recurrence = [`RRULE:${rrule}`];
-  }
-
-  // Handle attendees
-  const attendees = icsData['ATTENDEE'];
-  if (attendees && attendees.length > 0) {
-    event.attendees = attendees
-      .map(attendee => {
-        const emailMatch = attendee.match(/mailto:([^\s]+)/i);
-        if (emailMatch) {
-          return { email: emailMatch[1] };
-        }
-        return null;
-      })
-      .filter(a => a !== null);
-  }
-
-  return event;
-}
-
-function getFirstValue(data, key) {
-  return data[key] && data[key].length > 0 ? data[key][0] : null;
-}
-
-function parseICSDateTime(icsDateTime) {
-  if (!icsDateTime) return null;
-
-  // Remove any timezone info for simplicity
-  icsDateTime = icsDateTime.replace(/;.*$/, '');
-
-  if (icsDateTime.length === 8) {
-    // Date only: YYYYMMDD
-    const year = icsDateTime.substring(0, 4);
-    const month = icsDateTime.substring(4, 6);
-    const day = icsDateTime.substring(6, 8);
-    return { date: `${year}-${month}-${day}` };
-  } else if (icsDateTime.length >= 15) {
-    // DateTime: YYYYMMDDTHHMMSS or YYYYMMDDTHHMMSSZ
-    const year = icsDateTime.substring(0, 4);
-    const month = icsDateTime.substring(4, 6);
-    const day = icsDateTime.substring(6, 8);
-    const hour = icsDateTime.substring(9, 11);
-    const minute = icsDateTime.substring(11, 13);
-    const second = icsDateTime.substring(13, 15);
-
-    // Check if it's UTC (ends with Z)
-    if (icsDateTime.endsWith('Z')) {
-      return {
-        dateTime: `${year}-${month}-${day}T${hour}:${minute}:${second}Z`,
-        timeZone: 'UTC',
-      };
-    } else {
-      return {
-        dateTime: `${year}-${month}-${day}T${hour}:${minute}:${second}`,
-        timeZone: 'America/Los_Angeles', // Default timezone for testing
-      };
-    }
-  }
-
-  return null;
-}
+// ===== IMPORT PARSING FUNCTIONS FROM SHARED MODULE =====
+const {
+  parseCalendarFile,
+  convertICSToGoogleCalendarEvent,
+  parseICSDateTime,
+  getFirstValue,
+} = require('../parser.js');
 
 // ===== TEST FRAMEWORK =====
 
@@ -412,6 +262,245 @@ function testDateTimeParsing(runner) {
   runner.assertEquals(null, emptyResult, 'Handle empty string');
 }
 
+function testCorruptedFiles(runner) {
+  console.log('\n📝 Test: Corrupted File Handling');
+
+  const corruptedFiles = [
+    {
+      file: 'test_corrupted_missing_begin.ics',
+      shouldThrow: false,
+      shouldConvert: true,
+    },
+    {
+      file: 'test_corrupted_missing_end.ics',
+      shouldThrow: false,
+      shouldConvert: true,
+    },
+    {
+      file: 'test_corrupted_invalid_dates.ics',
+      shouldThrow: true,
+      errorContains: 'Invalid DTSTART format',
+    },
+    {
+      file: 'test_corrupted_missing_fields.ics',
+      shouldThrow: true,
+      errorContains: 'Missing required field',
+    },
+    {
+      file: 'test_corrupted_mismatched_tags.ics',
+      shouldThrow: false,
+      shouldConvert: true,
+    },
+    {
+      file: 'test_corrupted_truncated.ics',
+      shouldThrow: false,
+      shouldConvert: true,
+      // Note: This file has valid DTSTART/DTEND before truncation, so it parses successfully
+    },
+    {
+      file: 'test_corrupted_nested_error.ics',
+      shouldThrow: false,
+      shouldConvert: true,
+    },
+    {
+      file: 'test_corrupted_malformed_properties.ics',
+      shouldThrow: true,
+      errorContains: 'Missing required field',
+      // Note: Malformed properties (missing colon) are skipped, so DTSTART is missing, not invalid
+    },
+    {
+      file: 'test_corrupted_empty.ics',
+      shouldThrow: true,
+      errorContains: 'Missing required field',
+    },
+    {
+      file: 'test_corrupted_invalid_version.ics',
+      shouldThrow: false,
+      shouldConvert: true,
+    },
+    {
+      file: 'test_corrupted_missing_begin.vcs',
+      shouldThrow: false,
+      shouldConvert: true,
+    },
+    {
+      file: 'test_corrupted_missing_end.vcs',
+      shouldThrow: false,
+      shouldConvert: true,
+    },
+    {
+      file: 'test_corrupted_invalid_dates.vcs',
+      shouldThrow: true,
+      errorContains: 'Invalid DTSTART format',
+    },
+    {
+      file: 'test_corrupted_missing_fields.vcs',
+      shouldThrow: true,
+      errorContains: 'Missing required field',
+    },
+    {
+      file: 'test_corrupted_truncated.vcs',
+      shouldThrow: false,
+      shouldConvert: true,
+      // Note: This file has valid DTSTART/DTEND before truncation, so it parses successfully
+    },
+    {
+      file: 'test_corrupted_empty.vcs',
+      shouldThrow: true,
+      errorContains: 'Missing required field',
+    },
+    {
+      file: 'test_corrupted_malformed_properties.vcs',
+      shouldThrow: true,
+      errorContains: 'Missing required field',
+      // Note: Malformed properties (missing colon) are skipped, so DTSTART is missing, not invalid
+    },
+    {
+      file: 'test_corrupted_wrong_format.vcs',
+      shouldThrow: false,
+      shouldConvert: true,
+    },
+  ];
+
+  corruptedFiles.forEach(testCase => {
+    const filePath = path.join(__dirname, 'data', testCase.file);
+
+    if (!fs.existsSync(filePath)) {
+      console.log(`  ⚠️  File not found: ${testCase.file}`);
+      return;
+    }
+
+    try {
+      const content = fs.readFileSync(filePath, 'utf8');
+      const parsed = parseCalendarFile(content);
+
+      // Test should not crash during parsing
+      runner.assert(
+        true,
+        `${testCase.file}: Parser handles without crashing`,
+        'No crash',
+        'No crash'
+      );
+
+      // For empty files, parsed should be empty object
+      if (testCase.file.includes('empty')) {
+        runner.assert(
+          Object.keys(parsed).length === 0,
+          `${testCase.file}: Empty file returns empty object`,
+          'Empty object',
+          `Keys: ${Object.keys(parsed).length}`
+        );
+      }
+
+      // Try to convert to Google Calendar event
+      try {
+        const googleEvent = convertICSToGoogleCalendarEvent(parsed);
+
+        if (testCase.shouldThrow) {
+          runner.assert(
+            false,
+            `${testCase.file}: Should throw error with message containing "${testCase.errorContains}"`,
+            `Error: ${testCase.errorContains}`,
+            'No error thrown'
+          );
+        } else {
+          runner.assert(
+            googleEvent !== null && typeof googleEvent === 'object',
+            `${testCase.file}: Converts to Google event object successfully`,
+            'Valid object',
+            typeof googleEvent
+          );
+        }
+      } catch (conversionError) {
+        if (testCase.shouldThrow) {
+          runner.assert(
+            conversionError.message.includes(testCase.errorContains),
+            `${testCase.file}: Throws expected error`,
+            `Error containing "${testCase.errorContains}"`,
+            conversionError.message
+          );
+        } else {
+          runner.assert(
+            false,
+            `${testCase.file}: Should not throw exception`,
+            'No exception',
+            `Exception: ${conversionError.message}`
+          );
+        }
+      }
+    } catch (error) {
+      runner.assert(
+        false,
+        `${testCase.file}: Parsing should not throw exception`,
+        'No exception',
+        `Exception: ${error.message}`
+      );
+    }
+  });
+}
+
+function testCorruptedDateHandling(runner) {
+  console.log('\n📝 Test: Corrupted Date Handling');
+
+  // Test invalid date formats - should return null
+  const invalidDates = [
+    { input: 'INVALID-DATE-FORMAT', reason: 'contains non-numeric characters' },
+    { input: '2025-10-18T15:00:00', reason: 'uses dashes instead of compact format' },
+    { input: 'NOT-A-VALID-DATE', reason: 'completely invalid format' },
+    { input: '2025/10/18 15:00:00', reason: 'uses slashes and spaces' },
+    { input: '', reason: 'empty string' },
+    { input: '20251301T120000Z', reason: 'invalid month (13)' },
+    { input: '20250231T120000Z', reason: 'invalid date (Feb 31)' },
+    { input: '20251018T250000Z', reason: 'invalid hour (25)' },
+  ];
+
+  invalidDates.forEach(testCase => {
+    try {
+      const result = parseICSDateTime(testCase.input);
+
+      // Parser should not crash on invalid dates
+      runner.assert(
+        true,
+        `Invalid date "${testCase.input}" (${testCase.reason}) - parser handles without crashing`,
+        'No crash',
+        'No crash'
+      );
+
+      // Invalid dates should return null
+      runner.assert(
+        result === null,
+        `Invalid date "${testCase.input}" returns null`,
+        'null',
+        result === null ? 'null' : JSON.stringify(result)
+      );
+    } catch (error) {
+      runner.assert(
+        false,
+        `Invalid date "${testCase.input}" should not throw`,
+        'No exception',
+        `Exception: ${error.message}`
+      );
+    }
+  });
+
+  // Test valid dates to ensure validation isn't too strict
+  const validDates = [
+    { input: '20251018', expected: { date: '2025-10-18' } },
+    { input: '20251018T140000Z', expected: { dateTime: '2025-10-18T14:00:00Z', timeZone: 'UTC' } },
+  ];
+
+  validDates.forEach(testCase => {
+    const result = parseICSDateTime(testCase.input);
+    runner.assertEquals(
+      testCase.expected,
+      result,
+      `Valid date "${testCase.input}" parses correctly`
+    );
+  });
+
+  console.log('  ℹ️  Note: Parser now validates date formats and returns null for invalid dates');
+}
+
 // ===== RUN ALL TESTS =====
 
 function main() {
@@ -427,6 +516,8 @@ function main() {
     testMultipleICS(runner);
     testMultipleVCS(runner);
     testDateTimeParsing(runner);
+    testCorruptedFiles(runner);
+    testCorruptedDateHandling(runner);
   } catch (error) {
     console.error('\n❌ Test execution failed:', error);
     process.exit(1);

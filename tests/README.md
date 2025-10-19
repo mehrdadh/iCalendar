@@ -17,6 +17,36 @@ The `data/` directory contains sample calendar files for testing:
 - **test_multiple.ics** - ICS format with 5 events for testing multiple event parsing
 - **test_multiple.vcs** - VCS format with 5 events for testing multiple event parsing
 
+### Corrupted Test Files
+
+The `data/` directory includes 18 intentionally corrupted files for testing error handling:
+
+**ICS Corrupted Files (10 files):**
+
+- **test_corrupted_missing_begin.ics** - Missing BEGIN:VCALENDAR tag
+- **test_corrupted_missing_end.ics** - Missing END:VCALENDAR tag
+- **test_corrupted_invalid_dates.ics** - Invalid date formats
+- **test_corrupted_missing_fields.ics** - Missing required fields (DTSTART, SUMMARY)
+- **test_corrupted_mismatched_tags.ics** - Mismatched BEGIN/END tags
+- **test_corrupted_truncated.ics** - Prematurely truncated file
+- **test_corrupted_nested_error.ics** - Improperly nested components
+- **test_corrupted_malformed_properties.ics** - Malformed property syntax
+- **test_corrupted_empty.ics** - Completely empty file
+- **test_corrupted_invalid_version.ics** - Unsupported VERSION number
+
+**VCS Corrupted Files (8 files):**
+
+- **test_corrupted_missing_begin.vcs** - Missing BEGIN:VCALENDAR tag
+- **test_corrupted_missing_end.vcs** - Missing END:VCALENDAR tag
+- **test_corrupted_invalid_dates.vcs** - Invalid date formats
+- **test_corrupted_missing_fields.vcs** - Missing required fields
+- **test_corrupted_truncated.vcs** - Prematurely truncated file
+- **test_corrupted_empty.vcs** - Completely empty file
+- **test_corrupted_malformed_properties.vcs** - Malformed property syntax
+- **test_corrupted_wrong_format.vcs** - iCalendar 2.0 format in .vcs file
+
+📋 See **CORRUPTED_TEST_FILES_README.md** in the `data/` directory for detailed information about each corrupted file.
+
 ### Example Files
 
 - **example-tomorrow.ics** - Real-world example with 3 diverse events including alarms
@@ -113,6 +143,23 @@ The test suites validate the following functionality:
 - ✅ End time conversion to RFC3339 format
 - ✅ Date vs DateTime handling
 - ✅ Timezone preservation
+
+### Error Handling Tests (Corrupted Files)
+
+- ✅ Missing BEGIN:VCALENDAR tag handling
+- ✅ Missing END:VCALENDAR tag handling
+- ✅ Invalid date format handling
+- ✅ Missing required fields (DTSTART, SUMMARY)
+- ✅ Mismatched BEGIN/END tags
+- ✅ Truncated/incomplete files
+- ✅ Improperly nested components
+- ✅ Malformed property syntax
+- ✅ Empty file handling
+- ✅ Unsupported VERSION numbers
+- ✅ Version mismatch (.vcs with iCalendar 2.0 format)
+- ✅ Graceful error handling (no crashes)
+- ✅ Invalid date strings return null
+- ✅ Conversion handles missing data gracefully
 
 ## Expected Google Calendar API Format
 

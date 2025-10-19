@@ -328,80 +328,11 @@ function readCalendarFile(file) {
   reader.readAsText(file);
 }
 
-function parseCalendarFile(content) {
-  // First, unfold lines (both ICS and VCS spec: lines starting with space/tab are continuations)
-  const unfoldedContent = content.replace(/\r\n /g, '').replace(/\n /g, '').replace(/\r /g, '');
-
-  const lines = unfoldedContent.split(/\r\n|\n|\r/);
-  const attributes = {};
-  let inEvent = false;
-  let isVCS = false;
-
-  // Detect if this is a VCS (vCalendar 1.0) or ICS (iCalendar 2.0) file
-  for (const line of lines) {
-    if (line.trim().startsWith('VERSION:1.0')) {
-      isVCS = true;
-      console.log('Detected VCS (vCalendar 1.0) format');
-      break;
-    } else if (line.trim().startsWith('VERSION:2.0')) {
-      isVCS = false;
-      console.log('Detected ICS (iCalendar 2.0) format');
-      break;
-    }
-  }
-
-  lines.forEach(line => {
-    line = line.trim();
-
-    if (line === 'BEGIN:VEVENT') {
-      inEvent = true;
-      return;
-    }
-
-    if (line === 'END:VEVENT') {
-      inEvent = false;
-      return;
-    }
-
-    if (!inEvent) return;
-
-    // Parse key-value pairs
-    const colonIndex = line.indexOf(':');
-    if (colonIndex > 0) {
-      const key = line.substring(0, colonIndex);
-      let value = line.substring(colonIndex + 1);
-
-      // Handle special keys with parameters (e.g., DTSTART;TZID=...)
-      const semicolonIndex = key.indexOf(';');
-      const cleanKey = semicolonIndex > 0 ? key.substring(0, semicolonIndex) : key;
-
-      // Decode escape sequences
-      // Both ICS and VCS use similar escaping: \n = newline, \, = comma, \; = semicolon, \\ = backslash
-      value = value.replace(/\\n/g, '\n');
-      value = value.replace(/\\,/g, ',');
-      value = value.replace(/\\;/g, ';');
-      value = value.replace(/\\\\/g, '\\');
-
-      // Handle VCS-specific fields (convert to ICS equivalents)
-      let mappedKey = cleanKey;
-      if (isVCS) {
-        // VCS uses AALARM, we'll convert it to a recognizable format
-        // but we don't need to do much with it since Google Calendar API doesn't use this
-        if (cleanKey === 'AALARM') {
-          mappedKey = 'AALARM'; // Keep as is for now
-        }
-      }
-
-      // Store the attribute
-      if (!attributes[mappedKey]) {
-        attributes[mappedKey] = [];
-      }
-      attributes[mappedKey].push(value);
-    }
-  });
-
-  return attributes;
-}
+// ===== PARSER FUNCTIONS =====
+// Parser functions are now imported from parser.js (loaded before this script in popup.html)
+// Access them via window.ICSParser
+const { parseCalendarFile, convertICSToGoogleCalendarEvent, parseICSDateTime, getFirstValue } =
+  window.ICSParser;
 
 function displayICSAttributes(fileName, attributes, saveToStorage = true) {
   // Store data globally
@@ -641,92 +572,7 @@ function showSuccess(message) {
   successMessage.classList.remove('hidden');
 }
 
-function convertICSToGoogleCalendarEvent(icsData) {
-  const event = {
-    summary: getFirstValue(icsData, 'SUMMARY') || 'Untitled Event',
-    description: getFirstValue(icsData, 'DESCRIPTION') || '',
-    location: getFirstValue(icsData, 'LOCATION') || '',
-  };
-
-  // Handle start time
-  const dtstart = getFirstValue(icsData, 'DTSTART');
-  if (dtstart) {
-    event.start = parseICSDateTime(dtstart);
-  }
-
-  // Handle end time
-  const dtend = getFirstValue(icsData, 'DTEND');
-  if (dtend) {
-    event.end = parseICSDateTime(dtend);
-  }
-
-  // Handle recurrence rules if present
-  const rrule = getFirstValue(icsData, 'RRULE');
-  if (rrule) {
-    event.recurrence = [`RRULE:${rrule}`];
-  }
-
-  // Handle attendees
-  const attendees = icsData['ATTENDEE'];
-  if (attendees && attendees.length > 0) {
-    event.attendees = attendees
-      .map(attendee => {
-        // Extract email from ATTENDEE field (format: mailto:email@example.com)
-        const emailMatch = attendee.match(/mailto:([^\s]+)/i);
-        if (emailMatch) {
-          return { email: emailMatch[1] };
-        }
-        return null;
-      })
-      .filter(a => a !== null);
-  }
-
-  return event;
-}
-
-function getFirstValue(data, key) {
-  return data[key] && data[key].length > 0 ? data[key][0] : null;
-}
-
-function parseICSDateTime(icsDateTime) {
-  // ICS format: YYYYMMDDTHHMMSSZ or YYYYMMDD
-  if (!icsDateTime) return null;
-
-  // Remove any timezone info for simplicity
-  icsDateTime = icsDateTime.replace(/;.*$/, '');
-
-  if (icsDateTime.length === 8) {
-    // Date only: YYYYMMDD
-    const year = icsDateTime.substring(0, 4);
-    const month = icsDateTime.substring(4, 6);
-    const day = icsDateTime.substring(6, 8);
-    return { date: `${year}-${month}-${day}` };
-  } else if (icsDateTime.length >= 15) {
-    // DateTime: YYYYMMDDTHHMMSS or YYYYMMDDTHHMMSSZ
-    const year = icsDateTime.substring(0, 4);
-    const month = icsDateTime.substring(4, 6);
-    const day = icsDateTime.substring(6, 8);
-    const hour = icsDateTime.substring(9, 11);
-    const minute = icsDateTime.substring(11, 13);
-    const second = icsDateTime.substring(13, 15);
-
-    // Check if it's UTC (ends with Z)
-    if (icsDateTime.endsWith('Z')) {
-      return {
-        dateTime: `${year}-${month}-${day}T${hour}:${minute}:${second}Z`,
-        timeZone: 'UTC',
-      };
-    } else {
-      return {
-        dateTime: `${year}-${month}-${day}T${hour}:${minute}:${second}`,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      };
-    }
-  }
-
-  return null;
-}
-
+// ===== FILE BROWSER =====
 // Optional: Click to browse files
 dropZone.addEventListener('click', () => {
   const input = document.createElement('input');
