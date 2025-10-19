@@ -36,6 +36,9 @@ const BUTTON_TEXT_PROCESSING = 'Processing...';
 const BUTTON_TEXT_AUTHENTICATING = 'Authenticating...';
 const BUTTON_TEXT_ADDING = 'Adding to Calendar...';
 
+// Success message constant
+const SUCCESS_MESSAGE_EVENT_ADDED = 'Event added to Google Calendar! ✓';
+
 // Listen for status updates from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'statusUpdate') {
@@ -530,7 +533,7 @@ createEventBtn.addEventListener('click', async () => {
 
         if (response && response.success) {
           // Show success message
-          showSuccess('Event added to Google Calendar! ✓');
+          showSuccess(SUCCESS_MESSAGE_EVENT_ADDED);
 
           // After 2 seconds, fade out and clear
           setTimeout(() => {
@@ -583,3 +586,7 @@ dropZone.addEventListener('click', () => {
 
   input.click();
 });
+
+// Expose functions and constants for screenshot helper
+window.showSuccess = showSuccess;
+window.SUCCESS_MESSAGE_EVENT_ADDED = SUCCESS_MESSAGE_EVENT_ADDED;

@@ -557,15 +557,20 @@ END:VCALENDAR`;
 
         try {
           const iframeWin = getIframeWindow();
-          const btn = iframeWin.document.getElementById('createEventBtn');
-          if (btn && iframeWin.currentICSData) {
-            btn.click();
+
+          // Call the extension's own showSuccess function with its message constant
+          if (
+            typeof iframeWin.showSuccess === 'function' &&
+            iframeWin.SUCCESS_MESSAGE_EVENT_ADDED
+          ) {
+            iframeWin.showSuccess(iframeWin.SUCCESS_MESSAGE_EVENT_ADDED);
+            console.log('✓ Success message displayed using extension function');
           } else {
-            alert('Please load a sample event first!');
+            alert('Could not find showSuccess function or message constant!');
           }
         } catch (e) {
           console.error('Error showing success:', e);
-          alert('Please load a sample event first!');
+          alert('Error showing success message: ' + e.message);
         }
       }
 
