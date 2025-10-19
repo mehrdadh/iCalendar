@@ -1,0 +1,13 @@
+BEGIN:VCALENDAR
+VERSION:1.0
+PRODID:-//iCalendar Extension//EN
+
+BEGIN:VEVENT
+UID:corrupted-vcs-004@example.com
+DESCRIPTION:This VCS event is missing required DTSTART and SUMMARY fields
+LOCATION:Test Location
+STATUS:CONFIRMED
+END:VEVENT
+
+END:VCALENDAR
+

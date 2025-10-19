@@ -1,0 +1,16 @@
+BEGIN:VCALENDAR
+VERSION:1.0
+PRODID:-//iCalendar Extension//EN
+
+BEGIN:VEVENT
+UID:corrupted-vcs-003@example.com
+DTSTART:NOT-A-VALID-DATE
+DTEND:2025/10/18 15:00:00
+SUMMARY:Invalid Date Formats (VCS)
+DESCRIPTION:This VCS event has invalid date formats
+LOCATION:Test Location
+STATUS:CONFIRMED
+END:VEVENT
+
+END:VCALENDAR
+

@@ -1,0 +1,16 @@
+BEGIN:VCALENDAR
+VERSION:1.0
+PRODID:-//iCalendar Extension//EN
+
+BEGIN:VEVENT
+UID:corrupted-vcs-007@example.com
+DTSTART20251018T140000Z
+DTEND:20251018T150000Z
+SUMMARY:Malformed Properties (VCS)
+DESCRIPTION Missing colon separator in this property
+LOCATION=Test Location
+STATUS:CONFIRMED;EXTRA;DATA
+END:VEVENT
+
+END:VCALENDAR
+

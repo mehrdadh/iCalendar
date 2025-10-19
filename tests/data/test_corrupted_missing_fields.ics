@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//iCalendar Extension//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+
+BEGIN:VEVENT
+UID:corrupted-test-004@example.com
+DESCRIPTION:This event is missing required DTSTART and SUMMARY fields
+LOCATION:Test Location
+STATUS:CONFIRMED
+END:VEVENT
+
+END:VCALENDAR
+

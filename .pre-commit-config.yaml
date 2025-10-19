@@ -12,7 +12,7 @@ repos:
 
       # Ensure files end with newline
       - id: end-of-file-fixer
-        exclude: '\.min\.(js|css)$'
+        exclude: '(\.min\.(js|css)$|tests/data/)'
 
       # Check for files that would conflict in case-insensitive filesystems
       - id: check-case-conflict
@@ -71,7 +71,7 @@ repos:
         args:
           - --ignore-words-list=crate,aci,ans,ba,nd,te,uint
           - --skip="*.json,*.lock,*.min.js,*.min.css,releases/*"
-        exclude: '(releases/|node_modules/|\.git/)'
+        exclude: '(releases/|node_modules/|\.git/|tests/data/)'
 
   # Validate manifest.json for Chrome extensions
   - repo: local
