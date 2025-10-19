@@ -142,13 +142,14 @@ async function promptForAuthorization() {
       await chrome.storage.local.set({
         isAuthorized: false,
       });
-      showError('Authorization was not completed. Please reopen the extension to try again.');
+      showInfo('Authorization was not completed. Please reopen the extension to try again.');
     }
   } catch (error) {
     console.log('Authorization not completed:', error.message);
     await chrome.storage.local.set({
       isAuthorized: false,
     });
+    showInfo('Authorization was not completed. Please reopen the extension to try again.');
   }
 }
 
