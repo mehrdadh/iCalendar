@@ -279,7 +279,7 @@ function testCorruptedFiles(runner) {
     {
       file: 'test_corrupted_invalid_dates.ics',
       shouldThrow: true,
-      errorContains: 'Invalid DTSTART format',
+      errorContains: 'Invalid date format',
     },
     {
       file: 'test_corrupted_missing_fields.ics',
@@ -331,7 +331,7 @@ function testCorruptedFiles(runner) {
     {
       file: 'test_corrupted_invalid_dates.vcs',
       shouldThrow: true,
-      errorContains: 'Invalid DTSTART format',
+      errorContains: 'Invalid date format',
     },
     {
       file: 'test_corrupted_missing_fields.vcs',
