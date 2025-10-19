@@ -12,10 +12,9 @@ let clientId = null;
 chrome.runtime.onInstalled.addListener(details => {
   if (details.reason === 'install') {
     console.log('Extension installed - user will be prompted for authorization on first use');
-    // Set flag to indicate this is first install
+    // Set initial authorization state
     chrome.storage.local.set({
       isFirstInstall: true,
-      hasPromptedAuth: false,
       isAuthorized: false,
     });
   } else if (details.reason === 'update') {

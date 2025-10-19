@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function checkAndRequestAuthorization() {
   try {
     // Check if we already have authorization
-    const stored = await chrome.storage.local.get(['isAuthorized', 'hasPromptedAuth']);
+    const stored = await chrome.storage.local.get(['isAuthorized']);
 
     // If already authorized, nothing to do
     if (stored.isAuthorized) {
@@ -88,13 +88,14 @@ async function checkAndRequestAuthorization() {
       return true;
     }
 
-    // If we haven't prompted for auth yet, or if authorization was lost, prompt now
-    if (!stored.hasPromptedAuth) {
-      console.log('First time setup - requesting authorization');
-      await promptForAuthorization();
-    }
+    // Not authorized - prompt for authorization
+    // This will show the auth flow every time until user completes it
+    console.log('Not authorized - requesting authorization...');
+    await promptForAuthorization();
 
-    return stored.isAuthorized || false;
+    // Re-check authorization status after prompting
+    const updated = await chrome.storage.local.get(['isAuthorized']);
+    return updated.isAuthorized || false;
   } catch (error) {
     console.error('Error checking authorization:', error);
     return false;
@@ -129,7 +130,6 @@ async function promptForAuthorization() {
       // Mark as authorized
       await chrome.storage.local.set({
         isAuthorized: true,
-        hasPromptedAuth: true,
       });
       showSuccess('Successfully connected to Google Calendar! ✓');
 
@@ -138,17 +138,15 @@ async function promptForAuthorization() {
         successMessage.classList.add('hidden');
       }, 3000);
     } else {
-      // Mark that we attempted to prompt
+      // Authorization not completed
       await chrome.storage.local.set({
-        hasPromptedAuth: true,
         isAuthorized: false,
       });
-      showError('Authorization was not completed. You can try again later.');
+      showError('Authorization was not completed. Please reopen the extension to try again.');
     }
   } catch (error) {
     console.log('Authorization not completed:', error.message);
     await chrome.storage.local.set({
-      hasPromptedAuth: true,
       isAuthorized: false,
     });
   }
