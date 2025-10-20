@@ -32,6 +32,7 @@ FILES_TO_INCLUDE=(
     "popup.html"
     "popup.js"
     "background.js"
+    "parser.js"
     "styles.css"
     "images/logo_16x16.png"
     "images/logo_48x48.png"
