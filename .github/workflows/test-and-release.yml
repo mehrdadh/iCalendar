@@ -50,21 +50,27 @@ jobs:
           chmod +x scripts/build_release.sh
           ./scripts/build_release.sh
 
-      - name: Find release artifact
+      - name: Extract release package for artifact upload
         if: ${{ success() && (github.event.inputs.generate_release == 'true' || github.event.inputs.generate_release == '') }}
         id: find_artifact
         run: |
           LATEST_ZIP=$(ls -t releases/*.zip | head -n 1)
-          echo "artifact_path=$LATEST_ZIP" >> $GITHUB_OUTPUT
           echo "artifact_name=$(basename $LATEST_ZIP)" >> $GITHUB_OUTPUT
           echo "Found artifact: $LATEST_ZIP"
+
+          # Create staging directory and extract zip contents
+          mkdir -p release-staging
+          unzip -q "$LATEST_ZIP" -d release-staging
+
+          echo "Extracted contents:"
+          ls -la release-staging/
 
       - name: Upload release artifact
         if: ${{ success() && (github.event.inputs.generate_release == 'true' || github.event.inputs.generate_release == '') }}
         uses: actions/upload-artifact@v4
         with:
           name: chrome-extension-v${{ steps.version.outputs.version }}-${{ github.sha }}
-          path: ${{ steps.find_artifact.outputs.artifact_path }}
+          path: release-staging/
           retention-days: 90
 
       - name: Test summary
