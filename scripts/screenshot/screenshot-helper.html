@@ -118,6 +118,241 @@
         margin: 10px 0;
         border-left: 4px solid #2196f3;
       }
+
+      /* Promo Tile Styles */
+      .promo-section {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 3px solid #ddd;
+      }
+
+      .promo-frame {
+        width: 440px;
+        height: 280px;
+        border: 2px solid #333;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .promo-tile {
+        width: 440px;
+        height: 280px;
+        background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .promo-tile::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .promo-tile::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 250px;
+        height: 250px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .promo-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        width: 100%;
+      }
+
+      .promo-logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 15px;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+      }
+
+      .promo-title {
+        color: white;
+        font-size: 42px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        letter-spacing: -0.5px;
+      }
+
+      .promo-tagline {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0 0 20px 0;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .promo-features {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-top: 5px;
+      }
+
+      .promo-feature {
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .promo-feature-icon {
+        font-size: 24px;
+        margin-bottom: 5px;
+      }
+
+      /* Large Banner Promo Tile (1400x560) */
+      .promo-frame-large {
+        width: 1400px;
+        height: 560px;
+        border: 2px solid #333;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        max-width: 100%;
+      }
+
+      .promo-tile-large {
+        width: 1400px;
+        height: 560px;
+        background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 60px 80px;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .promo-tile-large::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: 10%;
+        width: 500px;
+        height: 500px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .promo-tile-large::after {
+        content: '';
+        position: absolute;
+        bottom: -40%;
+        left: 5%;
+        width: 600px;
+        height: 600px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .promo-content-large {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 60px;
+        width: 100%;
+      }
+
+      .promo-left {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        flex: 1;
+      }
+
+      .promo-logo-large {
+        width: 120px;
+        height: 120px;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+        flex-shrink: 0;
+      }
+
+      .promo-text-large {
+        text-align: left;
+      }
+
+      .promo-title-large {
+        color: white;
+        font-size: 72px;
+        font-weight: 700;
+        margin: 0 0 15px 0;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+        letter-spacing: -1px;
+        line-height: 1;
+      }
+
+      .promo-tagline-large {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 28px;
+        font-weight: 500;
+        margin: 0;
+        text-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .promo-features-large {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex-shrink: 0;
+      }
+
+      .promo-feature-large {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 20px 30px;
+        border-radius: 12px;
+        color: white;
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        min-width: 280px;
+      }
+
+      .promo-feature-icon-large {
+        font-size: 32px;
+      }
     </style>
   </head>
   <body>
@@ -210,6 +445,104 @@
             here!
           </li>
         </ul>
+      </div>
+
+      <!-- Promo Tile Section -->
+      <div class="promo-section">
+        <h1>🎨 Promo Tile (440×280)</h1>
+        <div class="info">
+          <strong>📐 Chrome Web Store Promo:</strong> This 440×280 promo tile is perfect for the
+          Chrome Web Store listing. Click the button below to save a high-quality PNG.
+        </div>
+
+        <div class="promo-frame" id="promo-frame">
+          <div class="promo-tile">
+            <div class="promo-content">
+              <img src="../../images/logo_512x512.png" alt="iCalendar Logo" class="promo-logo" />
+              <h1 class="promo-title">iCalendar</h1>
+              <p class="promo-tagline">Import calendar files to Google Calendar instantly</p>
+              <div class="promo-features">
+                <div class="promo-feature">
+                  <div class="promo-feature-icon">📁</div>
+                  <div>Drag & Drop</div>
+                </div>
+                <div class="promo-feature">
+                  <div class="promo-feature-icon">⚡</div>
+                  <div>Instant Import</div>
+                </div>
+                <div class="promo-feature">
+                  <div class="promo-feature-icon">🔒</div>
+                  <div>Secure</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-controls">
+          <h2>💾 Save Promo Tile</h2>
+          <button onclick="capturePromoTile()" style="background: #34a853">
+            📸 Save Promo Tile (440×280 PNG)
+          </button>
+          <div class="note">
+            <strong>Tip:</strong> The promo tile will be saved at 2x scale (880×560) for high
+            quality display.
+          </div>
+        </div>
+      </div>
+
+      <!-- Large Banner Promo Tile Section -->
+      <div class="promo-section">
+        <h1>🎨 Large Banner (1400×560)</h1>
+        <div class="info">
+          <strong>📐 Wide Promotional Banner:</strong> This 1400×560 banner is perfect for website
+          headers, Chrome Web Store marquee, or social media covers.
+        </div>
+
+        <div class="promo-frame-large" id="promo-frame-large">
+          <div class="promo-tile-large">
+            <div class="promo-content-large">
+              <div class="promo-left">
+                <img
+                  src="../../images/logo_512x512.png"
+                  alt="iCalendar Logo"
+                  class="promo-logo-large"
+                />
+                <div class="promo-text-large">
+                  <h1 class="promo-title-large">iCalendar</h1>
+                  <p class="promo-tagline-large">
+                    Import calendar files to Google Calendar instantly
+                  </p>
+                </div>
+              </div>
+              <div class="promo-features-large">
+                <div class="promo-feature-large">
+                  <div class="promo-feature-icon-large">📁</div>
+                  <div>Drag & Drop Support</div>
+                </div>
+                <div class="promo-feature-large">
+                  <div class="promo-feature-icon-large">⚡</div>
+                  <div>Instant Import</div>
+                </div>
+                <div class="promo-feature-large">
+                  <div class="promo-feature-icon-large">🔒</div>
+                  <div>Secure & Private</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-controls">
+          <h2>💾 Save Large Banner</h2>
+          <button onclick="capturePromoBanner()" style="background: #34a853">
+            📸 Save Large Banner (1400×560 PNG)
+          </button>
+          <div class="note">
+            <strong>Tip:</strong> The banner will be saved at 2x scale (2800×1120) for ultra-high
+            quality display.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -748,6 +1081,106 @@ END:VCALENDAR`;
         } catch (e) {
           console.error('Error capturing screenshot:', e);
           alert('Error capturing screenshot: ' + e.message);
+        }
+      }
+
+      // ===== PROMO TILE CAPTURE =====
+      async function capturePromoTile() {
+        try {
+          const promoTile = document.querySelector('.promo-tile');
+
+          console.log('Capturing promo tile...');
+
+          // Capture at 2x scale for high quality
+          const canvas = await html2canvas(promoTile, {
+            scale: 2,
+            backgroundColor: null,
+            logging: false,
+            useCORS: true,
+            allowTaint: true,
+            width: 440,
+            height: 280,
+          });
+
+          console.log('Canvas size:', canvas.width, 'x', canvas.height);
+
+          // Convert to blob and download
+          canvas.toBlob(
+            blob => {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+              const filename = `icalendar-promo-tile-${timestamp}.png`;
+              link.download = filename;
+              link.href = url;
+              link.click();
+              URL.revokeObjectURL(url);
+              console.log('✓ Promo tile saved! (440×280 at 2x scale = 880×560 pixels)');
+              console.log(`📁 File: ${filename}`);
+              alert(
+                `✅ Promo tile saved!\n\n` +
+                  `File: ${filename}\n` +
+                  `Size: 880×560 pixels (2x scale for quality)\n` +
+                  `Downloaded to: Your browser's Downloads folder\n\n` +
+                  `This is ready for Chrome Web Store!`
+              );
+            },
+            'image/png',
+            1.0
+          );
+        } catch (e) {
+          console.error('Error capturing promo tile:', e);
+          alert('Error capturing promo tile: ' + e.message);
+        }
+      }
+
+      // ===== LARGE BANNER CAPTURE =====
+      async function capturePromoBanner() {
+        try {
+          const promoBanner = document.querySelector('.promo-tile-large');
+
+          console.log('Capturing large promo banner...');
+
+          // Capture at 2x scale for high quality
+          const canvas = await html2canvas(promoBanner, {
+            scale: 2,
+            backgroundColor: null,
+            logging: false,
+            useCORS: true,
+            allowTaint: true,
+            width: 1400,
+            height: 560,
+          });
+
+          console.log('Canvas size:', canvas.width, 'x', canvas.height);
+
+          // Convert to blob and download
+          canvas.toBlob(
+            blob => {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+              const filename = `icalendar-promo-banner-${timestamp}.png`;
+              link.download = filename;
+              link.href = url;
+              link.click();
+              URL.revokeObjectURL(url);
+              console.log('✓ Promo banner saved! (1400×560 at 2x scale = 2800×1120 pixels)');
+              console.log(`📁 File: ${filename}`);
+              alert(
+                `✅ Large banner saved!\n\n` +
+                  `File: ${filename}\n` +
+                  `Size: 2800×1120 pixels (2x scale for quality)\n` +
+                  `Downloaded to: Your browser's Downloads folder\n\n` +
+                  `Perfect for website headers and promotional banners!`
+              );
+            },
+            'image/png',
+            1.0
+          );
+        } catch (e) {
+          console.error('Error capturing promo banner:', e);
+          alert('Error capturing promo banner: ' + e.message);
         }
       }
     </script>
