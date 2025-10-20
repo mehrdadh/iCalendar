@@ -63,7 +63,7 @@ jobs:
         if: ${{ success() && (github.event.inputs.generate_release == 'true' || github.event.inputs.generate_release == '') }}
         uses: actions/upload-artifact@v4
         with:
-          name: chrome-extension-v${{ steps.version.outputs.version }}
+          name: chrome-extension-v${{ steps.version.outputs.version }}-${{ github.sha }}
           path: ${{ steps.find_artifact.outputs.artifact_path }}
           retention-days: 90
 
