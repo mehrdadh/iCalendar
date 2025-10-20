@@ -404,8 +404,7 @@
             Click the <strong>📸 Save Screenshot (PNG)</strong> button to capture the current view
           </li>
           <li>
-            The frame is 640×400px - screenshots are saved at 2560×1600px (4x scale for ultra-high
-            quality)
+            The frame is 640×400px - screenshots are saved at 1280×800px (2x scale for high quality)
           </li>
           <li>
             Scroll within the frame to position the content, then click screenshot to capture that
@@ -485,8 +484,8 @@
             📸 Save Promo Tile (440×280 PNG)
           </button>
           <div class="note">
-            <strong>Tip:</strong> The promo tile will be saved at 2x scale (880×560) for high
-            quality display.
+            <strong>Tip:</strong> The promo tile will be saved at exact size (440×280) for Chrome
+            Web Store.
           </div>
         </div>
       </div>
@@ -539,8 +538,8 @@
             📸 Save Large Banner (1400×560 PNG)
           </button>
           <div class="note">
-            <strong>Tip:</strong> The banner will be saved at 2x scale (2800×1120) for ultra-high
-            quality display.
+            <strong>Tip:</strong> The banner will be saved at exact size (1400×560) for promotional
+            use.
           </div>
         </div>
       </div>
@@ -1001,7 +1000,7 @@ END:VCALENDAR`;
 
           // Capture the iframe's body content
           const fullCanvas = await html2canvas(iframeDoc.body, {
-            scale: 4, // Ultra-high quality (4x resolution)
+            scale: 2, // 2x scale for high quality
             backgroundColor: '#ffffff',
             logging: false,
             useCORS: true,
@@ -1025,8 +1024,8 @@ END:VCALENDAR`;
 
           // Create output canvas
           const outputCanvas = document.createElement('canvas');
-          outputCanvas.width = 640 * 4; // 2560 pixels
-          outputCanvas.height = 400 * 4; // 1600 pixels
+          outputCanvas.width = 640 * 2; // 1280 pixels (2x scale)
+          outputCanvas.height = 400 * 2; // 800 pixels (2x scale)
           const ctx = outputCanvas.getContext('2d');
 
           // Fill with white background
@@ -1040,17 +1039,17 @@ END:VCALENDAR`;
           // Draw the visible portion of the iframe content
           ctx.drawImage(
             fullCanvas,
-            visibleLeft * 4,
-            visibleTop * 4,
-            visibleWidth * 4,
-            visibleHeight * 4,
-            offsetX * 4,
-            offsetY * 4,
-            visibleWidth * 4,
-            visibleHeight * 4
+            visibleLeft * 2,
+            visibleTop * 2,
+            visibleWidth * 2,
+            visibleHeight * 2,
+            offsetX * 2,
+            offsetY * 2,
+            visibleWidth * 2,
+            visibleHeight * 2
           );
 
-          console.log('Drawing at offset:', offsetX * 4, offsetY * 4);
+          console.log('Drawing at offset:', offsetX * 2, offsetY * 2);
 
           // Convert to blob and download
           outputCanvas.toBlob(
@@ -1063,7 +1062,7 @@ END:VCALENDAR`;
               link.href = url;
               link.click();
               URL.revokeObjectURL(url);
-              console.log('✓ Screenshot saved! (640×400 at 4x scale = 2560×1600 pixels)');
+              console.log('✓ Screenshot saved! (640×400 at 2x scale = 1280×800 pixels)');
               console.log(`📁 File: ${filename}`);
               console.log(
                 '📁 Move to: releases/screenshots/ (create with: mkdir -p releases/screenshots)'
@@ -1071,6 +1070,7 @@ END:VCALENDAR`;
               alert(
                 `✅ Screenshot saved!\n\n` +
                   `File: ${filename}\n` +
+                  `Size: 1280×800 pixels (2x scale for quality)\n` +
                   `Downloaded to: Your browser's Downloads folder\n\n` +
                   `Next step: Move to releases/screenshots/`
               );
@@ -1091,9 +1091,9 @@ END:VCALENDAR`;
 
           console.log('Capturing promo tile...');
 
-          // Capture at 2x scale for high quality
+          // Capture at exact scale
           const canvas = await html2canvas(promoTile, {
-            scale: 2,
+            scale: 1,
             backgroundColor: null,
             logging: false,
             useCORS: true,
@@ -1115,12 +1115,12 @@ END:VCALENDAR`;
               link.href = url;
               link.click();
               URL.revokeObjectURL(url);
-              console.log('✓ Promo tile saved! (440×280 at 2x scale = 880×560 pixels)');
+              console.log('✓ Promo tile saved! (440×280 pixels)');
               console.log(`📁 File: ${filename}`);
               alert(
                 `✅ Promo tile saved!\n\n` +
                   `File: ${filename}\n` +
-                  `Size: 880×560 pixels (2x scale for quality)\n` +
+                  `Size: 440×280 pixels\n` +
                   `Downloaded to: Your browser's Downloads folder\n\n` +
                   `This is ready for Chrome Web Store!`
               );
@@ -1141,9 +1141,9 @@ END:VCALENDAR`;
 
           console.log('Capturing large promo banner...');
 
-          // Capture at 2x scale for high quality
+          // Capture at exact scale
           const canvas = await html2canvas(promoBanner, {
-            scale: 2,
+            scale: 1,
             backgroundColor: null,
             logging: false,
             useCORS: true,
@@ -1165,12 +1165,12 @@ END:VCALENDAR`;
               link.href = url;
               link.click();
               URL.revokeObjectURL(url);
-              console.log('✓ Promo banner saved! (1400×560 at 2x scale = 2800×1120 pixels)');
+              console.log('✓ Promo banner saved! (1400×560 pixels)');
               console.log(`📁 File: ${filename}`);
               alert(
                 `✅ Large banner saved!\n\n` +
                   `File: ${filename}\n` +
-                  `Size: 2800×1120 pixels (2x scale for quality)\n` +
+                  `Size: 1400×560 pixels\n` +
                   `Downloaded to: Your browser's Downloads folder\n\n` +
                   `Perfect for website headers and promotional banners!`
               );
