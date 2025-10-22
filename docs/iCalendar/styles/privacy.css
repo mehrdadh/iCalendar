@@ -1,0 +1,9 @@
+/* Styles specific to Privacy Policy page */
+
+.no-collect {
+  color: #d93025;
+}
+
+.collect {
+  color: #1e8e3e;
+}

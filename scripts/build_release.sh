@@ -34,9 +34,10 @@ FILES_TO_INCLUDE=(
     "background.js"
     "parser.js"
     "styles.css"
-    "images/logo_16x16.png"
-    "images/logo_48x48.png"
+    "images/logo_32x32.png"
+    "images/logo_64x64.png"
     "images/logo_128x128.png"
+    "images/logo_256x256.png"
     "images/logo_512x512.png"
 )
 

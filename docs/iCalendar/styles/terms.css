@@ -1,0 +1,13 @@
+/* Styles specific to Terms of Service page */
+
+.important-notice {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 20px;
+  margin: 25px 0;
+  border-radius: 8px;
+}
+
+.important-notice strong {
+  color: #856404;
+}
