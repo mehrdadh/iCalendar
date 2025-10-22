@@ -211,6 +211,18 @@ footer {
   color: white;
 }
 
+footer nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+footer span {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 footer a {
   color: white;
   text-decoration: none;

@@ -3,270 +3,277 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Privacy Policy - iCalendar Chrome Extension</title>
+    <title>iCalendar - Privacy Policy</title>
     <link rel="stylesheet" href="../styles/common.css" />
     <link rel="stylesheet" href="../styles/legal.css" />
     <link rel="stylesheet" href="../styles/privacy.css" />
   </head>
   <body>
     <div class="container">
-      <h1>Privacy Policy for iCalendar Chrome Extension</h1>
-      <p class="date"><strong>Last Updated:</strong> October 10, 2025</p>
+      <div id="header-placeholder"></div>
 
-      <div class="summary">
-        <h3>Summary (TL;DR)</h3>
+      <div class="content">
+        <h1>Privacy Policy for iCalendar Chrome Extension</h1>
+        <p class="date"><strong>Last Updated:</strong> October 10, 2025</p>
+
+        <div class="summary">
+          <h3>Summary (TL;DR)</h3>
+          <ul>
+            <li>✅ We only collect OAuth tokens (expires in 1 hour) and your calendar list</li>
+            <li>✅ Data is stored locally in encrypted Chrome storage</li>
+            <li>✅ We do NOT share data with anyone</li>
+            <li>✅ We do NOT track or collect personal information</li>
+            <li>✅ We only communicate with official Google APIs</li>
+            <li>✅ You can revoke access anytime through Google Account settings</li>
+            <li>✅ All code is open source and auditable</li>
+          </ul>
+        </div>
+
+        <h2>Introduction</h2>
+        <p>
+          This Privacy Policy describes how the iCalendar Chrome Extension ("the Extension", "we",
+          "our") collects, uses, and protects information when you use our Chrome extension.
+        </p>
+
+        <h2>Information We Collect</h2>
+
+        <h3 class="collect">OAuth Access Tokens</h3>
         <ul>
-          <li>✅ We only collect OAuth tokens (expires in 1 hour) and your calendar list</li>
-          <li>✅ Data is stored locally in encrypted Chrome storage</li>
-          <li>✅ We do NOT share data with anyone</li>
-          <li>✅ We do NOT track or collect personal information</li>
-          <li>✅ We only communicate with official Google APIs</li>
-          <li>✅ You can revoke access anytime through Google Account settings</li>
-          <li>✅ All code is open source and auditable</li>
+          <li>
+            <strong>What:</strong> Temporary authentication tokens provided by Google OAuth 2.0
+          </li>
+          <li>
+            <strong>Why:</strong> To authenticate API requests to Google Calendar on your behalf
+          </li>
+          <li><strong>Duration:</strong> Automatically expires after 1 hour</li>
+          <li><strong>Storage:</strong> Encrypted in Chrome's local storage</li>
         </ul>
+
+        <h3 class="collect">Calendar List</h3>
+        <ul>
+          <li><strong>What:</strong> Names and IDs of your Google Calendars</li>
+          <li><strong>Why:</strong> To display calendar options when adding events</li>
+          <li>
+            <strong>Duration:</strong> Cached until extension is uninstalled or manually cleared
+          </li>
+          <li><strong>Storage:</strong> Encrypted in Chrome's local storage</li>
+        </ul>
+
+        <h3 class="collect">Authorization Status</h3>
+        <ul>
+          <li>
+            <strong>What:</strong> Boolean flag indicating whether you've authorized the extension
+          </li>
+          <li><strong>Why:</strong> To provide a smooth user experience</li>
+          <li><strong>Storage:</strong> Chrome's local storage</li>
+        </ul>
+
+        <h2 class="no-collect">Information We Do NOT Collect</h2>
+        <p>We do <strong>NOT</strong> collect, store, or transmit:</p>
+        <ul>
+          <li>
+            ❌ Your calendar event contents (except temporarily in memory during event creation)
+          </li>
+          <li>❌ Your email address or personal information</li>
+          <li>❌ Your browsing history or website data</li>
+          <li>❌ Any personally identifiable information beyond OAuth tokens</li>
+          <li>❌ Usage analytics or tracking data</li>
+          <li>❌ Cookies or tracking mechanisms</li>
+        </ul>
+
+        <h2>How We Use Information</h2>
+
+        <h3>OAuth Access Tokens</h3>
+        <p>Used exclusively to:</p>
+        <ul>
+          <li>Create calendar events in your Google Calendar</li>
+          <li>Fetch your calendar list for display in the extension</li>
+          <li>Authenticate with Google Calendar API</li>
+        </ul>
+
+        <h3>Calendar List</h3>
+        <p>Used to:</p>
+        <ul>
+          <li>Display calendar options in the extension dropdown</li>
+          <li>Allow you to select which calendar to add events to</li>
+        </ul>
+
+        <h2>Data Storage and Security</h2>
+
+        <h3>Local Storage</h3>
+        <ul>
+          <li>All data is stored locally in <code>chrome.storage.local</code></li>
+          <li>Storage is encrypted and sandboxed by Chrome browser</li>
+          <li>Data is isolated from websites and other extensions</li>
+          <li>Data is automatically cleared when extension is uninstalled</li>
+        </ul>
+
+        <h3>No External Servers</h3>
+        <ul>
+          <li>We do NOT operate any external servers</li>
+          <li>We do NOT transmit data to third-party services</li>
+          <li>
+            Communication only occurs with official Google APIs:
+            <ul>
+              <li><code>accounts.google.com</code> (authentication)</li>
+              <li><code>www.googleapis.com</code> (Calendar API)</li>
+            </ul>
+          </li>
+        </ul>
+
+        <h3>Token Expiration</h3>
+        <ul>
+          <li>OAuth tokens automatically expire after 1 hour</li>
+          <li>Expired tokens are not used and are replaced with new ones</li>
+          <li>Token validation occurs before each API request</li>
+        </ul>
+
+        <h2>Data Sharing</h2>
+        <p>We do <strong>NOT</strong> share your data with:</p>
+        <ul>
+          <li>Third-party services</li>
+          <li>Advertisers</li>
+          <li>Analytics companies</li>
+          <li>Any external parties</li>
+        </ul>
+        <p>The only data transmission occurs directly between:</p>
+        <ul>
+          <li>Your browser and Google's official authentication servers</li>
+          <li>Your browser and Google's official Calendar API</li>
+        </ul>
+
+        <h2>Permissions Explained</h2>
+
+        <h3>Identity Permission</h3>
+        <p>
+          Required for OAuth 2.0 authentication with your Google Account to access Google Calendar.
+        </p>
+
+        <h3>Storage Permission</h3>
+        <p>
+          Required to cache OAuth tokens and calendar list to prevent repeated authentication
+          prompts.
+        </p>
+
+        <h3>Host Permissions</h3>
+        <ul>
+          <li><code>accounts.google.com</code>: OAuth 2.0 authentication flow</li>
+          <li><code>www.googleapis.com</code>: Google Calendar API requests</li>
+        </ul>
+
+        <h2>Your Rights and Control</h2>
+
+        <h3>View Stored Data</h3>
+        <p>You can view what's stored by:</p>
+        <ol>
+          <li>Opening Chrome DevTools (F12)</li>
+          <li>Go to Application → Storage → Local Storage</li>
+          <li>Look for <code>chrome-extension://[extension-id]</code></li>
+        </ol>
+
+        <h3>Clear Stored Data</h3>
+        <p>You can clear all stored data by:</p>
+        <ol>
+          <li>Uninstalling the extension</li>
+          <li>Using Chrome's "Clear browsing data" feature</li>
+          <li>Clearing site data for the extension</li>
+        </ol>
+
+        <h3>Revoke Access</h3>
+        <p>You can revoke the extension's access to Google Calendar by:</p>
+        <ol>
+          <li>
+            Visit
+            <a href="https://myaccount.google.com/permissions" target="_blank"
+              >Google Account Permissions</a
+            >
+          </li>
+          <li>Find "iCalendar Chrome Extension"</li>
+          <li>Click "Remove Access"</li>
+        </ol>
+
+        <h2>Children's Privacy</h2>
+        <p>
+          This extension is not directed to children under 13 years of age. We do not knowingly
+          collect information from children.
+        </p>
+
+        <h2>Changes to This Policy</h2>
+        <p>
+          We may update this Privacy Policy from time to time. Changes will be reflected by the
+          "Last Updated" date at the top of this policy.
+        </p>
+
+        <h2>Compliance</h2>
+        <p>This extension complies with:</p>
+        <ul>
+          <li>Chrome Web Store Developer Program Policies</li>
+          <li>Google API Services User Data Policy</li>
+          <li>General Data Protection Regulation (GDPR)</li>
+          <li>California Consumer Privacy Act (CCPA)</li>
+        </ul>
+
+        <h2>Data Retention</h2>
+        <ul>
+          <li>
+            <strong>OAuth Tokens:</strong> Retained for 1 hour (until expiration), then
+            automatically cleared
+          </li>
+          <li>
+            <strong>Calendar List:</strong> Retained until extension is uninstalled or manually
+            cleared
+          </li>
+          <li><strong>Authorization Status:</strong> Retained until extension is uninstalled</li>
+        </ul>
+
+        <h2>Third-Party Services</h2>
+        <p>This extension only communicates with:</p>
+        <ul>
+          <li>
+            <strong>Google OAuth 2.0</strong> (<code>accounts.google.com</code>) - For
+            authentication
+          </li>
+          <li>
+            <strong>Google Calendar API</strong> (<code>www.googleapis.com</code>) - For creating
+            events and fetching calendar list
+          </li>
+        </ul>
+        <p>We do not use:</p>
+        <ul>
+          <li>Analytics services (e.g., Google Analytics)</li>
+          <li>Crash reporting services</li>
+          <li>Advertising networks</li>
+          <li>Any other third-party services</li>
+        </ul>
+
+        <h2>Contact Information</h2>
+        <p>
+          If you have questions about this Privacy Policy or our data practices, please contact us
+          through our GitHub repository:
+          <a href="https://github.com/mehrdadh/iCalendar" target="_blank"
+            >https://github.com/mehrdadh/iCalendar</a
+          >
+        </p>
+
+        <h2>Consent</h2>
+        <p>
+          By using the iCalendar Chrome Extension, you consent to this Privacy Policy and our
+          handling of information as described.
+        </p>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #e0e0e0" />
+
+        <p style="text-align: center; color: #666">
+          <strong
+            >Your privacy is important to us. This extension is designed to be as privacy-friendly
+            as possible while providing useful functionality.</strong
+          >
+        </p>
       </div>
 
-      <h2>Introduction</h2>
-      <p>
-        This Privacy Policy describes how the iCalendar Chrome Extension ("the Extension", "we",
-        "our") collects, uses, and protects information when you use our Chrome extension.
-      </p>
-
-      <h2>Information We Collect</h2>
-
-      <h3 class="collect">OAuth Access Tokens</h3>
-      <ul>
-        <li><strong>What:</strong> Temporary authentication tokens provided by Google OAuth 2.0</li>
-        <li>
-          <strong>Why:</strong> To authenticate API requests to Google Calendar on your behalf
-        </li>
-        <li><strong>Duration:</strong> Automatically expires after 1 hour</li>
-        <li><strong>Storage:</strong> Encrypted in Chrome's local storage</li>
-      </ul>
-
-      <h3 class="collect">Calendar List</h3>
-      <ul>
-        <li><strong>What:</strong> Names and IDs of your Google Calendars</li>
-        <li><strong>Why:</strong> To display calendar options when adding events</li>
-        <li>
-          <strong>Duration:</strong> Cached until extension is uninstalled or manually cleared
-        </li>
-        <li><strong>Storage:</strong> Encrypted in Chrome's local storage</li>
-      </ul>
-
-      <h3 class="collect">Authorization Status</h3>
-      <ul>
-        <li>
-          <strong>What:</strong> Boolean flag indicating whether you've authorized the extension
-        </li>
-        <li><strong>Why:</strong> To provide a smooth user experience</li>
-        <li><strong>Storage:</strong> Chrome's local storage</li>
-      </ul>
-
-      <h2 class="no-collect">Information We Do NOT Collect</h2>
-      <p>We do <strong>NOT</strong> collect, store, or transmit:</p>
-      <ul>
-        <li>
-          ❌ Your calendar event contents (except temporarily in memory during event creation)
-        </li>
-        <li>❌ Your email address or personal information</li>
-        <li>❌ Your browsing history or website data</li>
-        <li>❌ Any personally identifiable information beyond OAuth tokens</li>
-        <li>❌ Usage analytics or tracking data</li>
-        <li>❌ Cookies or tracking mechanisms</li>
-      </ul>
-
-      <h2>How We Use Information</h2>
-
-      <h3>OAuth Access Tokens</h3>
-      <p>Used exclusively to:</p>
-      <ul>
-        <li>Create calendar events in your Google Calendar</li>
-        <li>Fetch your calendar list for display in the extension</li>
-        <li>Authenticate with Google Calendar API</li>
-      </ul>
-
-      <h3>Calendar List</h3>
-      <p>Used to:</p>
-      <ul>
-        <li>Display calendar options in the extension dropdown</li>
-        <li>Allow you to select which calendar to add events to</li>
-      </ul>
-
-      <h2>Data Storage and Security</h2>
-
-      <h3>Local Storage</h3>
-      <ul>
-        <li>All data is stored locally in <code>chrome.storage.local</code></li>
-        <li>Storage is encrypted and sandboxed by Chrome browser</li>
-        <li>Data is isolated from websites and other extensions</li>
-        <li>Data is automatically cleared when extension is uninstalled</li>
-      </ul>
-
-      <h3>No External Servers</h3>
-      <ul>
-        <li>We do NOT operate any external servers</li>
-        <li>We do NOT transmit data to third-party services</li>
-        <li>
-          Communication only occurs with official Google APIs:
-          <ul>
-            <li><code>accounts.google.com</code> (authentication)</li>
-            <li><code>www.googleapis.com</code> (Calendar API)</li>
-          </ul>
-        </li>
-      </ul>
-
-      <h3>Token Expiration</h3>
-      <ul>
-        <li>OAuth tokens automatically expire after 1 hour</li>
-        <li>Expired tokens are not used and are replaced with new ones</li>
-        <li>Token validation occurs before each API request</li>
-      </ul>
-
-      <h2>Data Sharing</h2>
-      <p>We do <strong>NOT</strong> share your data with:</p>
-      <ul>
-        <li>Third-party services</li>
-        <li>Advertisers</li>
-        <li>Analytics companies</li>
-        <li>Any external parties</li>
-      </ul>
-      <p>The only data transmission occurs directly between:</p>
-      <ul>
-        <li>Your browser and Google's official authentication servers</li>
-        <li>Your browser and Google's official Calendar API</li>
-      </ul>
-
-      <h2>Permissions Explained</h2>
-
-      <h3>Identity Permission</h3>
-      <p>
-        Required for OAuth 2.0 authentication with your Google Account to access Google Calendar.
-      </p>
-
-      <h3>Storage Permission</h3>
-      <p>
-        Required to cache OAuth tokens and calendar list to prevent repeated authentication prompts.
-      </p>
-
-      <h3>Host Permissions</h3>
-      <ul>
-        <li><code>accounts.google.com</code>: OAuth 2.0 authentication flow</li>
-        <li><code>www.googleapis.com</code>: Google Calendar API requests</li>
-      </ul>
-
-      <h2>Your Rights and Control</h2>
-
-      <h3>View Stored Data</h3>
-      <p>You can view what's stored by:</p>
-      <ol>
-        <li>Opening Chrome DevTools (F12)</li>
-        <li>Go to Application → Storage → Local Storage</li>
-        <li>Look for <code>chrome-extension://[extension-id]</code></li>
-      </ol>
-
-      <h3>Clear Stored Data</h3>
-      <p>You can clear all stored data by:</p>
-      <ol>
-        <li>Uninstalling the extension</li>
-        <li>Using Chrome's "Clear browsing data" feature</li>
-        <li>Clearing site data for the extension</li>
-      </ol>
-
-      <h3>Revoke Access</h3>
-      <p>You can revoke the extension's access to Google Calendar by:</p>
-      <ol>
-        <li>
-          Visit
-          <a href="https://myaccount.google.com/permissions" target="_blank"
-            >Google Account Permissions</a
-          >
-        </li>
-        <li>Find "iCalendar Chrome Extension"</li>
-        <li>Click "Remove Access"</li>
-      </ol>
-
-      <h2>Children's Privacy</h2>
-      <p>
-        This extension is not directed to children under 13 years of age. We do not knowingly
-        collect information from children.
-      </p>
-
-      <h2>Changes to This Policy</h2>
-      <p>
-        We may update this Privacy Policy from time to time. Changes will be reflected by the "Last
-        Updated" date at the top of this policy.
-      </p>
-
-      <h2>Compliance</h2>
-      <p>This extension complies with:</p>
-      <ul>
-        <li>Chrome Web Store Developer Program Policies</li>
-        <li>Google API Services User Data Policy</li>
-        <li>General Data Protection Regulation (GDPR)</li>
-        <li>California Consumer Privacy Act (CCPA)</li>
-      </ul>
-
-      <h2>Data Retention</h2>
-      <ul>
-        <li>
-          <strong>OAuth Tokens:</strong> Retained for 1 hour (until expiration), then automatically
-          cleared
-        </li>
-        <li>
-          <strong>Calendar List:</strong> Retained until extension is uninstalled or manually
-          cleared
-        </li>
-        <li><strong>Authorization Status:</strong> Retained until extension is uninstalled</li>
-      </ul>
-
-      <h2>Third-Party Services</h2>
-      <p>This extension only communicates with:</p>
-      <ul>
-        <li>
-          <strong>Google OAuth 2.0</strong> (<code>accounts.google.com</code>) - For authentication
-        </li>
-        <li>
-          <strong>Google Calendar API</strong> (<code>www.googleapis.com</code>) - For creating
-          events and fetching calendar list
-        </li>
-      </ul>
-      <p>We do not use:</p>
-      <ul>
-        <li>Analytics services (e.g., Google Analytics)</li>
-        <li>Crash reporting services</li>
-        <li>Advertising networks</li>
-        <li>Any other third-party services</li>
-      </ul>
-
-      <h2>Contact Information</h2>
-      <p>
-        If you have questions about this Privacy Policy or our data practices, please contact us
-        through our GitHub repository:
-        <a href="https://github.com/mehrdadh/iCalendar" target="_blank"
-          >https://github.com/mehrdadh/iCalendar</a
-        >
-      </p>
-
-      <h2>Consent</h2>
-      <p>
-        By using the iCalendar Chrome Extension, you consent to this Privacy Policy and our handling
-        of information as described.
-      </p>
-
-      <hr style="margin: 40px 0; border: none; border-top: 2px solid #e0e0e0" />
-
-      <p style="text-align: center; color: #666">
-        <strong
-          >Your privacy is important to us. This extension is designed to be as privacy-friendly as
-          possible while providing useful functionality.</strong
-        >
-      </p>
-
-      <p style="text-align: center; margin-top: 20px">
-        <a href="../">Back to Home</a> • <a href="../terms-of-service/">Terms of Service</a> •
-        <a href="https://github.com/mehrdadh/iCalendar">GitHub</a>
-      </p>
+      <div id="footer-placeholder"></div>
     </div>
+    <script src="../scripts/header.js"></script>
+    <script src="../scripts/footer.js"></script>
   </body>
 </html>
