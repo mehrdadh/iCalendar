@@ -17,8 +17,8 @@
   },
   "permissions": ["identity", "storage"],
   "host_permissions": [
-    "https://www.googleapis.com/*",
-    "https://accounts.google.com/*"
+    "https://www.googleapis.com/calendar/*",
+    "https://www.googleapis.com/oauth2/*"
   ],
   "oauth2": {
     "client_id": "464187272652-0cjnf3o7e61ufk4lf6fvhulrra1hs3vs.apps.googleusercontent.com",
