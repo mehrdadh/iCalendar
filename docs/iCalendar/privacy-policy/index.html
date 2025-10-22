@@ -14,7 +14,7 @@
 
       <div class="content">
         <h1>Privacy Policy for iCalendar Chrome Extension</h1>
-        <p class="date"><strong>Last Updated:</strong> October 10, 2025</p>
+        <p class="date"><strong>Last Updated:</strong> October 22, 2025</p>
 
         <div class="summary">
           <h3>Summary (TL;DR)</h3>
@@ -23,7 +23,9 @@
             <li>✅ Data is stored locally in encrypted Chrome storage</li>
             <li>✅ We do NOT share data with anyone</li>
             <li>✅ We do NOT track or collect personal information</li>
-            <li>✅ We only communicate with official Google APIs</li>
+            <li>
+              ✅ We only communicate with Google Calendar API and OAuth2 API (no other services)
+            </li>
             <li>✅ You can revoke access anytime through Google Account settings</li>
             <li>✅ All code is open source and auditable</li>
           </ul>
@@ -115,8 +117,8 @@
           <li>
             Communication only occurs with official Google APIs:
             <ul>
-              <li><code>accounts.google.com</code> (authentication)</li>
-              <li><code>www.googleapis.com</code> (Calendar API)</li>
+              <li><code>www.googleapis.com/calendar/*</code> (Calendar API - specifically v3)</li>
+              <li><code>www.googleapis.com/oauth2/*</code> (OAuth2 user info - specifically v2)</li>
             </ul>
           </li>
         </ul>
@@ -138,8 +140,8 @@
         </ul>
         <p>The only data transmission occurs directly between:</p>
         <ul>
-          <li>Your browser and Google's official authentication servers</li>
-          <li>Your browser and Google's official Calendar API</li>
+          <li>Your browser and Google Calendar API (<code>www.googleapis.com/calendar/*</code>)</li>
+          <li>Your browser and Google OAuth2 API (<code>www.googleapis.com/oauth2/*</code>)</li>
         </ul>
 
         <h2>Permissions Explained</h2>
@@ -157,8 +159,14 @@
 
         <h3>Host Permissions</h3>
         <ul>
-          <li><code>accounts.google.com</code>: OAuth 2.0 authentication flow</li>
-          <li><code>www.googleapis.com</code>: Google Calendar API requests</li>
+          <li>
+            <code>www.googleapis.com/calendar/*</code>: Google Calendar API requests (limited to
+            Calendar API only)
+          </li>
+          <li>
+            <code>www.googleapis.com/oauth2/*</code>: OAuth 2.0 user info API (for retrieving basic
+            user information)
+          </li>
         </ul>
 
         <h2>Your Rights and Control</h2>
@@ -230,12 +238,12 @@
         <p>This extension only communicates with:</p>
         <ul>
           <li>
-            <strong>Google OAuth 2.0</strong> (<code>accounts.google.com</code>) - For
-            authentication
+            <strong>Google Calendar API</strong> (<code>www.googleapis.com/calendar/*</code>) - For
+            creating events and fetching calendar list (specifically uses v3)
           </li>
           <li>
-            <strong>Google Calendar API</strong> (<code>www.googleapis.com</code>) - For creating
-            events and fetching calendar list
+            <strong>Google OAuth2 API</strong> (<code>www.googleapis.com/oauth2/*</code>) - For
+            retrieving basic user information during authentication (specifically uses v2)
           </li>
         </ul>
         <p>We do not use:</p>
