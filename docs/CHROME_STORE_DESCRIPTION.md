@@ -42,4 +42,4 @@ Note: You'll need to authorize the extension to access your calendar during firs
 Permissions: This extension requires calendar access to create events and list your calendars.
 
 Support & Feedback 💬
-For issues, questions, or feature requests, please visit: <https://github.com/mehrdadh/iCalendar>
+For issues, questions, or feature requests, please visit: https://github.com/mehrdadh/iCalendar
