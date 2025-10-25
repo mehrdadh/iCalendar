@@ -16,6 +16,9 @@ const eventTitle = document.getElementById('eventTitle');
 const calendarSelector = document.getElementById('calendarSelector');
 const calendarDropdown = document.getElementById('calendarDropdown');
 
+// Special value for "Load more calendars" option
+const LOAD_MORE_CALENDARS_VALUE = '__load_more_calendars__';
+
 console.log('DOM elements loaded:', {
   dropZone: !!dropZone,
   fileInfo: !!fileInfo,
@@ -25,6 +28,32 @@ console.log('DOM elements loaded:', {
 // Store parsed ICS data globally
 let currentICSData = null;
 let currentFileName = null;
+
+// Handle calendar dropdown selection
+calendarDropdown.addEventListener('change', async e => {
+  if (e.target.value === LOAD_MORE_CALENDARS_VALUE) {
+    console.log('User selected "Load more calendars..."');
+
+    // Reset to previous valid selection temporarily
+    const options = Array.from(calendarDropdown.options);
+    const primaryOption = options.find(opt => opt.value === 'primary');
+    if (primaryOption) {
+      calendarDropdown.value = 'primary';
+    }
+
+    // Trigger authorization for calendar list access
+    try {
+      const granted = await promptForCalendarListAccess();
+
+      if (granted) {
+        // Reload calendars now that user has granted access
+        await loadCalendars();
+      }
+    } catch (error) {
+      console.log('Error during calendar list authorization:', error);
+    }
+  }
+});
 
 // Get Client ID from manifest.json
 const manifest = chrome.runtime.getManifest();
@@ -51,12 +80,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Check authorization status and restore event data when popup opens
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    // First, check if user is authorized
-    const isAuthorized = await checkAndRequestAuthorization();
+    // Check authorization states
+    // hasBasicAccess: Can add events to primary calendar (essential)
+    // hasCalendarListAccess: Can read calendar list (optional)
+    const stored = await chrome.storage.local.get(['hasBasicAccess', 'hasCalendarListAccess']);
+    const hasBasicAccess = stored.hasBasicAccess || false;
+    const hasCalendarListAccess = stored.hasCalendarListAccess || false;
 
-    // If authorized, load calendars
-    if (isAuthorized) {
+    console.log('Authorization state:', { hasBasicAccess, hasCalendarListAccess });
+
+    // If user doesn't have basic access yet, automatically prompt for authorization
+    if (!hasBasicAccess) {
+      console.log('No basic access - prompting for authorization...');
+      await promptForBasicAuthorization();
+    }
+
+    // Load calendars based on calendar list access
+    if (hasCalendarListAccess) {
+      console.log('Has calendar list access, loading calendars...');
       await loadCalendars();
+    } else {
+      console.log('No calendar list access, showing default calendar option');
+      showDefaultCalendarWithLoadMore();
+      calendarSelector.classList.remove('hidden');
     }
 
     // Then restore event data if available (if caching is enabled)
@@ -77,34 +123,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Check if user is authorized, if not request authorization
-async function checkAndRequestAuthorization() {
-  try {
-    // Check if we already have authorization
-    const stored = await chrome.storage.local.get(['isAuthorized']);
-
-    // If already authorized, nothing to do
-    if (stored.isAuthorized) {
-      console.log('User is already authorized');
-      return true;
-    }
-
-    // Not authorized - prompt for authorization
-    // This will show the auth flow every time until user completes it
-    console.log('Not authorized - requesting authorization...');
-    await promptForAuthorization();
-
-    // Re-check authorization status after prompting
-    const updated = await chrome.storage.local.get(['isAuthorized']);
-    return updated.isAuthorized || false;
-  } catch (error) {
-    console.log('Error checking authorization:', error);
-    return false;
-  }
-}
-
-// Prompt user for authorization
-async function promptForAuthorization() {
+// Prompt user for basic authorization (to add events)
+async function promptForBasicAuthorization() {
   try {
     // Show a friendly message
     showInfo("Welcome! Let's connect to your Google Calendar...");
@@ -128,9 +148,9 @@ async function promptForAuthorization() {
     });
 
     if (response && response.success) {
-      // Mark as authorized
+      // Mark as having basic access
       await chrome.storage.local.set({
-        isAuthorized: true,
+        hasBasicAccess: true,
       });
       showSuccess('Successfully connected to Google Calendar! ✓');
 
@@ -138,19 +158,67 @@ async function promptForAuthorization() {
       setTimeout(() => {
         successMessage.classList.add('hidden');
       }, 3000);
+
+      return true;
     } else {
       // Authorization not completed
-      await chrome.storage.local.set({
-        isAuthorized: false,
-      });
       showInfo('Authorization was not completed. Please reopen the extension to try again.');
+      return false;
     }
   } catch (error) {
     console.log('Authorization not completed:', error.message);
-    await chrome.storage.local.set({
-      isAuthorized: false,
-    });
     showInfo('Authorization was not completed. Please reopen the extension to try again.');
+    return false;
+  }
+}
+
+// Prompt user for calendar list access (optional, to see all calendars)
+async function promptForCalendarListAccess() {
+  try {
+    // Show a friendly message
+    showInfo('Loading your calendars...');
+
+    // Request authorization (will reuse existing token if user already has basic access)
+    const response = await new Promise(resolve => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'requestAuthorization',
+          clientId: GOOGLE_CLIENT_ID,
+        },
+        response => {
+          if (chrome.runtime.lastError) {
+            console.log('Calendar list access not granted:', chrome.runtime.lastError);
+            resolve({ success: false, error: chrome.runtime.lastError.message });
+            return;
+          }
+          resolve(response);
+        }
+      );
+    });
+
+    if (response && response.success) {
+      // Mark as having basic access AND calendar list access
+      await chrome.storage.local.set({
+        hasBasicAccess: true,
+        hasCalendarListAccess: true,
+      });
+
+      return true;
+    } else {
+      // Authorization not completed - that's okay, user can still use primary calendar
+      showInfo('Calendar list not loaded. You can still add events to your primary calendar.');
+      setTimeout(() => {
+        successMessage.classList.add('hidden');
+      }, 3000);
+      return false;
+    }
+  } catch (error) {
+    console.log('Calendar list access not granted:', error.message);
+    showInfo('Calendar list not loaded. You can still add events to your primary calendar.');
+    setTimeout(() => {
+      successMessage.classList.add('hidden');
+    }, 3000);
+    return false;
   }
 }
 
@@ -167,15 +235,18 @@ async function loadCalendars() {
   try {
     console.log('Loading calendars...');
 
-    // First, load from cache immediately
+    // First, load from cache immediately (optimistic UI)
     const stored = await chrome.storage.local.get(['calendars']);
+    let hadCachedCalendars = false;
+
     if (stored.calendars && stored.calendars.length > 0) {
-      console.log('Loading calendars from cache');
+      console.log('Loading calendars from cache (optimistic)');
       populateCalendarDropdown(stored.calendars);
       calendarSelector.classList.remove('hidden');
+      hadCachedCalendars = true;
     } else {
       // Show default while loading
-      calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
+      showDefaultCalendarWithLoadMore();
       calendarSelector.classList.remove('hidden');
     }
 
@@ -203,17 +274,90 @@ async function loadCalendars() {
       // Update dropdown with fresh data
       populateCalendarDropdown(response.calendars);
 
-      // Save calendars to storage
-      await chrome.storage.local.set({ calendars: response.calendars });
+      // Save calendars to storage and mark as having calendar list access
+      await chrome.storage.local.set({
+        calendars: response.calendars,
+        hasCalendarListAccess: true,
+      });
     } else {
-      console.log('Could not load calendars, using default:', response?.error);
-      // If no cache and fetch failed, keep default
-      if (!stored.calendars || stored.calendars.length === 0) {
-        calendarDropdown.innerHTML = '<option value="primary">My Calendar</option>';
+      console.log('Could not load calendars - Response:', {
+        success: response?.success,
+        error: response?.error,
+        isAuthError: response?.isAuthError,
+        statusCode: response?.statusCode,
+      });
+
+      // Check if this is an auth error (401/403)
+      const isAuthError =
+        response?.isAuthError || response?.statusCode === 401 || response?.statusCode === 403;
+
+      if (isAuthError) {
+        console.log('Auth error detected - token is invalid, clearing all access');
+
+        // When we get 401/403, it means the OAuth token is completely invalid
+        // (not just calendar list access, but ALL access including event creation)
+        // So we need to clear everything and reset to initial state
+
+        // Clear calendar cache
+        await chrome.storage.local.remove(['calendars']);
+
+        // Clear the invalid token
+        await chrome.storage.local.remove(['cachedAccessToken', 'tokenExpiryTime']);
+
+        // Reset BOTH access flags - the entire OAuth consent was revoked
+        await chrome.storage.local.set({
+          hasBasicAccess: false,
+          hasCalendarListAccess: false,
+        });
+
+        // ALWAYS replace the dropdown with default, even if we showed cached calendars earlier
+        console.log(
+          'Replacing dropdown with default (had cached calendars:',
+          hadCachedCalendars,
+          ')'
+        );
+        showDefaultCalendarWithLoadMore();
+
+        // Verify everything was cleared
+        const check = await chrome.storage.local.get([
+          'calendars',
+          'hasCalendarListAccess',
+          'hasBasicAccess',
+          'cachedAccessToken',
+        ]);
+        console.log('After clearing - Storage state:', check);
+        console.log('Dropdown now shows:', calendarDropdown.innerHTML.substring(0, 100));
+
+        // Show message to user that they need to re-authorize
+        showInfo('Access was revoked. Please reopen the extension to reconnect.');
+      } else {
+        // Non-auth error (network, rate limit, etc.)
+        // If no cache and fetch failed, show default with "Load more" option
+        if (!hadCachedCalendars) {
+          showDefaultCalendarWithLoadMore();
+        }
+        // If we have cache, keep showing it (user can still use it during temporary network issues)
+        console.log('Non-auth error - keeping cached calendars if available');
       }
     }
   } catch (error) {
     console.log('Error in loadCalendars:', error);
+  }
+}
+
+// Show default calendar dropdown with "Load more calendars..." option
+function showDefaultCalendarWithLoadMore() {
+  const currentSelection = calendarDropdown.value;
+
+  calendarDropdown.innerHTML = `
+    <option value="primary">Primary Calendar</option>
+    <option disabled>─────────────</option>
+    <option value="${LOAD_MORE_CALENDARS_VALUE}">📋 Load more calendars...</option>
+  `;
+
+  // Restore selection if it was primary
+  if (currentSelection === 'primary') {
+    calendarDropdown.value = 'primary';
   }
 }
 

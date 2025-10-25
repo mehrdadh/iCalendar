@@ -13,12 +13,24 @@ chrome.runtime.onInstalled.addListener(details => {
   if (details.reason === 'install') {
     console.log('Extension installed - user will be prompted for authorization on first use');
     // Set initial authorization state
+    // hasBasicAccess: false = will auto-prompt for basic calendar access
+    // hasCalendarListAccess: false = will show "Load more calendars..." option
     chrome.storage.local.set({
       isFirstInstall: true,
-      isAuthorized: false,
+      hasBasicAccess: false,
+      hasCalendarListAccess: false,
     });
   } else if (details.reason === 'update') {
     console.log('Extension updated');
+    // Migrate old isAuthorized to new hasBasicAccess if needed
+    chrome.storage.local.get(['isAuthorized', 'hasBasicAccess'], stored => {
+      if (stored.isAuthorized && !stored.hasBasicAccess) {
+        console.log('Migrating old authorization state to new format');
+        chrome.storage.local.set({
+          hasBasicAccess: true,
+        });
+      }
+    });
   }
 });
 
@@ -99,7 +111,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
       .catch(error => {
         console.log('Could not get calendars:', error.message);
-        sendResponse({ success: false, error: error.message });
+        sendResponse({
+          success: false,
+          error: error.message,
+          isAuthError: error.isAuthError || false,
+          statusCode: error.statusCode,
+        });
       });
     return true; // Keep channel open for async response
   }
@@ -338,33 +355,22 @@ async function getCalendarList(clientId) {
     });
 
     if (!response.ok) {
-      // If auth error, try with fresh token
+      // If auth error (401/403), this means the user has lost calendar list permissions
+      // We should NOT retry with forceAuth as that would clear the basic access token
       if (response.status === 401 || response.status === 403) {
-        console.log('Authentication issue, retrying with fresh token...');
-        const newAccessToken = await getAccessToken(clientId, true);
-
-        const retryResponse = await fetch(
-          'https://www.googleapis.com/calendar/v3/users/me/calendarList',
-          {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${newAccessToken}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        if (!retryResponse.ok) {
-          const retryError = await retryResponse.text();
-          throw new Error(`Failed to get calendar list: ${retryResponse.status} - ${retryError}`);
-        }
-
-        const retryData = await retryResponse.json();
-        return retryData.items || [];
+        console.log('Calendar list access denied (401/403)');
+        const errorText = await response.text();
+        const error = new Error(`Calendar list access denied: ${response.status} - ${errorText}`);
+        error.isAuthError = true;
+        error.statusCode = response.status;
+        throw error;
       }
 
       const errorText = await response.text();
-      throw new Error(`Failed to get calendar list: ${response.status} - ${errorText}`);
+      // Create error object with status code
+      const error = new Error(`Failed to get calendar list: ${response.status} - ${errorText}`);
+      error.statusCode = response.status;
+      throw error;
     }
 
     const data = await response.json();
