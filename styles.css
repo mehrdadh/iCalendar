@@ -32,12 +32,24 @@ body:has(.file-info.hidden) {
 .header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 12px;
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
   width: 100%;
+  position: relative;
+}
+
+.app-title {
+  color: white;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  text-align: center;
+  margin-left: -6px; /* Compensate for size difference: (logo 40px - button 28px) / 2 = 6px */
 }
 
 .logo {
@@ -47,12 +59,52 @@ body:has(.file-info.hidden) {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-.app-title {
+/* Sign Out Icon Button */
+.sign-out-icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+.sign-out-icon-btn svg {
+  width: 14px;
+  height: 14px;
   color: white;
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.sign-out-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sign-out-icon-btn:hover svg {
+  transform: translateX(2px);
+}
+
+.sign-out-icon-btn:active {
+  transform: translateY(0);
+}
+
+.sign-out-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sign-out-icon-btn.hidden {
+  display: none;
 }
 
 /* Calendar Selector */

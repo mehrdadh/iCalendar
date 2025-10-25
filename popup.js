@@ -15,6 +15,7 @@ const successMessage = document.getElementById('successMessage');
 const eventTitle = document.getElementById('eventTitle');
 const calendarSelector = document.getElementById('calendarSelector');
 const calendarDropdown = document.getElementById('calendarDropdown');
+const signOutBtn = document.getElementById('signOutBtn');
 
 // Special value for "Load more calendars" option
 const LOAD_MORE_CALENDARS_VALUE = '__load_more_calendars__';
@@ -55,6 +56,46 @@ calendarDropdown.addEventListener('change', async e => {
   }
 });
 
+// Handle sign-out button
+signOutBtn.addEventListener('click', async () => {
+  console.log('User clicked sign out');
+
+  // Confirm with user
+  if (
+    !confirm(
+      'Are you sure you want to sign out? This will revoke all access to your Google Calendar.'
+    )
+  ) {
+    return;
+  }
+
+  // Disable button during sign out
+  signOutBtn.disabled = true;
+  signOutBtn.style.opacity = '0.5';
+
+  try {
+    await signOut();
+
+    // Show success message
+    showSuccess('Successfully signed out! Please reopen the extension to sign in again.');
+
+    // Hide sign-out button
+    signOutBtn.classList.add('hidden');
+
+    // After 2 seconds, close the popup
+    setTimeout(() => {
+      window.close();
+    }, 2000);
+  } catch (error) {
+    console.log('Error during sign out:', error);
+    showError('Failed to sign out: ' + error.message);
+
+    // Re-enable button
+    signOutBtn.disabled = false;
+    signOutBtn.style.opacity = '1';
+  }
+});
+
 // Get Client ID from manifest.json
 const manifest = chrome.runtime.getManifest();
 const GOOGLE_CLIENT_ID = manifest.oauth2.client_id;
@@ -89,15 +130,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log('Authorization state:', { hasBasicAccess, hasCalendarListAccess });
 
+    // Show sign-out button if user has basic access
+    if (hasBasicAccess) {
+      signOutBtn.classList.remove('hidden');
+    }
+
+    // Track if we just authorized in this session
+    let justAuthorized = false;
+
     // If user doesn't have basic access yet, automatically prompt for authorization
     if (!hasBasicAccess) {
       console.log('No basic access - prompting for authorization...');
       await promptForBasicAuthorization();
+
+      // After successful authorization, show sign-out button
+      const updatedStored = await chrome.storage.local.get(['hasBasicAccess']);
+      if (updatedStored.hasBasicAccess) {
+        signOutBtn.classList.remove('hidden');
+        justAuthorized = true;
+      }
     }
 
-    // Load calendars based on calendar list access
-    if (hasCalendarListAccess) {
-      console.log('Has calendar list access, loading calendars...');
+    // Load calendars based on access state
+    if (hasCalendarListAccess || justAuthorized) {
+      // User has calendar list access OR just completed authorization
+      // Try to load calendars automatically
+      console.log('Loading calendars...');
       await loadCalendars();
     } else {
       console.log('No calendar list access, showing default calendar option');
@@ -219,6 +277,53 @@ async function promptForCalendarListAccess() {
       successMessage.classList.add('hidden');
     }, 3000);
     return false;
+  }
+}
+
+// Sign out and revoke access
+async function signOut() {
+  console.log('Signing out...');
+
+  try {
+    // Send message to background to revoke token with Google
+    const response = await new Promise(resolve => {
+      chrome.runtime.sendMessage(
+        {
+          action: 'revokeToken',
+          clientId: GOOGLE_CLIENT_ID,
+        },
+        response => {
+          if (chrome.runtime.lastError) {
+            console.log('Error revoking token:', chrome.runtime.lastError);
+            resolve({ success: false, error: chrome.runtime.lastError.message });
+            return;
+          }
+          resolve(response);
+        }
+      );
+    });
+
+    if (response && !response.success) {
+      console.log('Token revocation failed (non-critical):', response.error);
+      // Continue with local cleanup even if revoke fails
+    }
+
+    // Clear all local data
+    await chrome.storage.local.clear();
+
+    console.log('All local data cleared');
+
+    // Reset UI
+    calendarSelector.classList.add('hidden');
+    showDefaultCalendarWithLoadMore();
+
+    // Clear any displayed events
+    await clearEventDisplay();
+
+    return true;
+  } catch (error) {
+    console.log('Error during sign out:', error);
+    throw error;
   }
 }
 

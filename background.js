@@ -120,6 +120,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     return true; // Keep channel open for async response
   }
+
+  if (request.action === 'revokeToken') {
+    console.log('Revoking access token');
+
+    revokeAccessToken()
+      .then(() => {
+        console.log('Token revoked successfully');
+        sendResponse({ success: true });
+      })
+      .catch(error => {
+        console.log('Failed to revoke token:', error.message);
+        sendResponse({ success: false, error: error.message });
+      });
+    return true; // Keep channel open for async response
+  }
 });
 
 // Check if cached token is still valid (reads from storage)
@@ -467,6 +482,56 @@ async function createCalendarEvent(
     return result;
   } catch (error) {
     console.log('Error in createCalendarEvent:', error.message);
+    throw error;
+  }
+}
+
+// Revoke access token with Google
+async function revokeAccessToken() {
+  try {
+    // Get the current access token from storage
+    const stored = await chrome.storage.local.get(['cachedAccessToken']);
+    const token = stored.cachedAccessToken;
+
+    if (!token) {
+      console.log('No token to revoke');
+      // Still clear local storage even if no token
+      await chrome.storage.local.clear();
+      return;
+    }
+
+    console.log('Revoking token with Google...');
+
+    // Call Google's revoke endpoint
+    const response = await fetch(
+      `https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(token)}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('Token revocation failed:', response.status, errorText);
+      // Don't throw error - still want to clear local storage
+    } else {
+      console.log('Token successfully revoked with Google');
+    }
+
+    // Clear all local storage regardless of revoke success
+    await chrome.storage.local.clear();
+    console.log('Local storage cleared');
+  } catch (error) {
+    console.log('Error revoking token:', error.message);
+    // Still clear local storage even if revoke fails
+    try {
+      await chrome.storage.local.clear();
+    } catch (clearError) {
+      console.log('Error clearing storage:', clearError.message);
+    }
     throw error;
   }
 }
