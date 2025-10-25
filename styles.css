@@ -1,3 +1,7 @@
+/* ==========================================================================
+   COMMON STYLES - Shared across all pages
+   ========================================================================== */
+
 * {
   margin: 0;
   padding: 0;
@@ -8,14 +12,62 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
     sans-serif;
   background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
-  width: 400px;
-  min-width: 400px;
-  min-height: 500px;
   transition: min-height 0.3s ease;
 }
 
+.hidden {
+  display: none;
+}
+
+/* Status Messages - Common */
+.status-message {
+  padding: 11px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-message.hidden {
+  display: none;
+}
+
+.status-message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* ==========================================================================
+   POPUP PAGE STYLES
+   ========================================================================== */
+
+/* Popup Body Specific */
+body.popup-page {
+  width: 400px;
+  min-width: 400px;
+  min-height: 500px;
+}
+
 /* Compact body when only drop zone is visible */
-body:has(.file-info.hidden) {
+body.popup-page:has(.file-info.hidden) {
   min-height: auto;
 }
 
@@ -270,29 +322,7 @@ body:has(.file-info.hidden) {
   text-decoration: underline;
 }
 
-.status-message {
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  margin-top: 10px;
-}
-
-.status-message.success {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.status-message.error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
-.status-message.hidden {
-  display: none;
-}
-
+/* Drop Zone */
 .drop-zone {
   border: 2px dashed rgba(255, 255, 255, 0.5);
   border-radius: 10px;
@@ -349,6 +379,21 @@ body:has(.file-info.hidden) {
   font-size: 12px;
 }
 
+/* Show drop zone message when no event is loaded */
+body.popup-page:not(:has(.file-info:not(.hidden))) .drop-zone {
+  padding: 25px 30px;
+}
+
+body.popup-page:not(:has(.file-info:not(.hidden))) .drop-zone .icon {
+  width: 48px;
+  height: 48px;
+}
+
+body.popup-page:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
+  font-size: 18px;
+}
+
+/* File Info */
 .file-info {
   background: white;
   border-radius: 12px;
@@ -360,20 +405,6 @@ body:has(.file-info.hidden) {
 
 .file-info.hidden {
   display: none;
-}
-
-/* Show drop zone message when no event is loaded */
-body:not(:has(.file-info:not(.hidden))) .drop-zone {
-  padding: 25px 30px;
-}
-
-body:not(:has(.file-info:not(.hidden))) .drop-zone .icon {
-  width: 48px;
-  height: 48px;
-}
-
-body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
-  font-size: 18px;
 }
 
 .file-info h3 {
@@ -439,6 +470,7 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   display: -webkit-box;
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   text-overflow: ellipsis;
 }
 
@@ -449,6 +481,7 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   font-style: italic;
 }
 
+/* Buttons */
 .create-event-btn {
   width: 100%;
   padding: 14px;
@@ -503,6 +536,7 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   transform: translateY(0);
 }
 
+/* Messages */
 .error-message {
   background: #fff3cd;
   border: 2px solid #ffc107;
@@ -656,5 +690,150 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
 }
 
 .confirm-modal-btn:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   OPTIONS PAGE STYLES
+   ========================================================================== */
+
+/* Options Body Specific */
+body.options-page {
+  min-height: 100vh;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.options-container {
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Options Header */
+.options-header {
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+  padding: 20px;
+  text-align: center;
+  color: white;
+}
+
+.options-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Options Content */
+.options-content {
+  padding: 20px;
+}
+
+/* Setting Section */
+.setting-section {
+  margin-bottom: 20px;
+}
+
+.setting-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-soon {
+  font-size: 10px;
+  font-weight: 600;
+  color: #888;
+  background: #f0f0f0;
+  padding: 3px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+}
+
+/* Select Dropdown (Options specific) */
+.setting-select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.setting-select:hover {
+  border-color: #4285f4;
+}
+
+.setting-select:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+.setting-select:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Options Actions (kept for backward compatibility) */
+.options-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:active {
   transform: translateY(0);
 }
