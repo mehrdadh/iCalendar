@@ -37,29 +37,96 @@ const confirmModalMessage = document.getElementById('confirmModalMessage');
 const confirmModalCancel = document.getElementById('confirmModalCancel');
 const confirmModalConfirm = document.getElementById('confirmModalConfirm');
 
-// Custom confirm dialog
+// Custom confirm dialog with full accessibility support
 function showConfirm(title, message) {
   return new Promise(resolve => {
     confirmModalTitle.textContent = title;
     confirmModalMessage.textContent = message;
     confirmModal.classList.remove('hidden');
 
-    const handleConfirm = () => {
+    // Set ARIA attributes for accessibility
+    confirmModal.setAttribute('role', 'dialog');
+    confirmModal.setAttribute('aria-modal', 'true');
+    confirmModal.setAttribute('aria-labelledby', 'confirmModalTitle');
+    confirmModal.setAttribute('aria-describedby', 'confirmModalMessage');
+
+    // Store the element that had focus before modal opened
+    const previouslyFocusedElement = document.activeElement;
+
+    // Auto-focus on Cancel button (safer default)
+    confirmModalCancel.focus();
+
+    const cleanup = () => {
       confirmModal.classList.add('hidden');
       confirmModalConfirm.removeEventListener('click', handleConfirm);
       confirmModalCancel.removeEventListener('click', handleCancel);
+      document.removeEventListener('keydown', handleKeyDown);
+      confirmModal.removeEventListener('click', handleOverlayClick);
+
+      // Restore focus to previous element
+      if (previouslyFocusedElement) {
+        previouslyFocusedElement.focus();
+      }
+    };
+
+    const handleConfirm = () => {
+      cleanup();
       resolve(true);
     };
 
     const handleCancel = () => {
-      confirmModal.classList.add('hidden');
-      confirmModalConfirm.removeEventListener('click', handleConfirm);
-      confirmModalCancel.removeEventListener('click', handleCancel);
+      cleanup();
       resolve(false);
     };
 
+    // Handle keyboard events
+    const handleKeyDown = e => {
+      // ESC key cancels
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleCancel();
+      }
+
+      // Enter key confirms (only if not focused on Cancel button)
+      if (e.key === 'Enter' && document.activeElement !== confirmModalCancel) {
+        e.preventDefault();
+        handleConfirm();
+      }
+
+      // Tab navigation - trap focus within modal
+      if (e.key === 'Tab') {
+        const focusableElements = [confirmModalCancel, confirmModalConfirm];
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          // Shift+Tab: going backwards
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          // Tab: going forwards
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    // Handle clicking outside modal (on overlay) to cancel
+    const handleOverlayClick = e => {
+      if (e.target === confirmModal || e.target.classList.contains('confirm-modal-overlay')) {
+        handleCancel();
+      }
+    };
+
+    // Add event listeners
     confirmModalConfirm.addEventListener('click', handleConfirm);
     confirmModalCancel.addEventListener('click', handleCancel);
+    document.addEventListener('keydown', handleKeyDown);
+    confirmModal.addEventListener('click', handleOverlayClick);
   });
 }
 

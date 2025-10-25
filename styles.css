@@ -564,6 +564,7 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
+  cursor: pointer;
 }
 
 .confirm-modal-content {
@@ -626,6 +627,11 @@ body:not(:has(.file-info:not(.hidden))) .drop-zone h2 {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.confirm-modal-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.3);
 }
 
 .confirm-modal-btn-cancel {
