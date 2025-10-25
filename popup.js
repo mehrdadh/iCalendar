@@ -30,6 +30,39 @@ console.log('DOM elements loaded:', {
 let currentICSData = null;
 let currentFileName = null;
 
+// Get modal elements
+const confirmModal = document.getElementById('confirmModal');
+const confirmModalTitle = document.getElementById('confirmModalTitle');
+const confirmModalMessage = document.getElementById('confirmModalMessage');
+const confirmModalCancel = document.getElementById('confirmModalCancel');
+const confirmModalConfirm = document.getElementById('confirmModalConfirm');
+
+// Custom confirm dialog
+function showConfirm(title, message) {
+  return new Promise(resolve => {
+    confirmModalTitle.textContent = title;
+    confirmModalMessage.textContent = message;
+    confirmModal.classList.remove('hidden');
+
+    const handleConfirm = () => {
+      confirmModal.classList.add('hidden');
+      confirmModalConfirm.removeEventListener('click', handleConfirm);
+      confirmModalCancel.removeEventListener('click', handleCancel);
+      resolve(true);
+    };
+
+    const handleCancel = () => {
+      confirmModal.classList.add('hidden');
+      confirmModalConfirm.removeEventListener('click', handleConfirm);
+      confirmModalCancel.removeEventListener('click', handleCancel);
+      resolve(false);
+    };
+
+    confirmModalConfirm.addEventListener('click', handleConfirm);
+    confirmModalCancel.addEventListener('click', handleCancel);
+  });
+}
+
 // Handle calendar dropdown selection
 calendarDropdown.addEventListener('change', async e => {
   if (e.target.value === LOAD_MORE_CALENDARS_VALUE) {
@@ -60,12 +93,13 @@ calendarDropdown.addEventListener('change', async e => {
 signOutBtn.addEventListener('click', async () => {
   console.log('User clicked sign out');
 
-  // Confirm with user
-  if (
-    !confirm(
-      'Are you sure you want to sign out? This will revoke all access to your Google Calendar.'
-    )
-  ) {
+  // Confirm with user using custom modal
+  const confirmed = await showConfirm(
+    'Sign Out',
+    'Ready to sign out? You can always reconnect anytime to continue adding calendar events!'
+  );
+
+  if (!confirmed) {
     return;
   }
 

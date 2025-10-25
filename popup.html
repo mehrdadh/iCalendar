@@ -31,6 +31,24 @@
       <div id="errorMessage" class="error-message hidden"></div>
       <div id="successMessage" class="success-message hidden"></div>
 
+      <!-- Custom Confirmation Modal -->
+      <div id="confirmModal" class="confirm-modal hidden">
+        <div class="confirm-modal-overlay"></div>
+        <div class="confirm-modal-content">
+          <img src="images/logo_512x512.png" alt="iCalendar" class="confirm-modal-icon" />
+          <h3 id="confirmModalTitle" class="confirm-modal-title">Confirm Action</h3>
+          <p id="confirmModalMessage" class="confirm-modal-message"></p>
+          <div class="confirm-modal-buttons">
+            <button id="confirmModalCancel" class="confirm-modal-btn confirm-modal-btn-cancel">
+              Cancel
+            </button>
+            <button id="confirmModalConfirm" class="confirm-modal-btn confirm-modal-btn-confirm">
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div id="calendarSelector" class="calendar-selector hidden">
         <label for="calendarDropdown">Select Calendar:</label>
         <select id="calendarDropdown" class="calendar-dropdown">
