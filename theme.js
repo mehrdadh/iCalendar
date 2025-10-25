@@ -18,14 +18,13 @@ const DEFAULT_THEME = 'light';
 
     // Listen for system theme changes (when in 'system' mode)
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addEventListener('change', e => {
-      chrome.storage.sync.get({ themeMode: DEFAULT_THEME }, result => {
-        if (result.themeMode === 'system') {
-          const systemTheme = e.matches ? 'dark' : 'light';
-          console.log('System theme changed to:', systemTheme);
-          setThemeAttribute(systemTheme);
-        }
-      });
+    mediaQuery.addEventListener('change', async e => {
+      const { themeMode } = await chrome.storage.sync.get({ themeMode: DEFAULT_THEME });
+      if (themeMode === 'system') {
+        const systemTheme = e.matches ? 'dark' : 'light';
+        console.log('System theme changed to:', systemTheme);
+        setThemeAttribute(systemTheme);
+      }
     });
 
     // Listen for theme changes from storage (e.g., changed in options page)
