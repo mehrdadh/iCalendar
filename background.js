@@ -391,7 +391,19 @@ async function getCalendarList(clientId) {
     const data = await response.json();
     console.log('Calendar list retrieved:', data.items?.length, 'calendars');
 
-    return data.items || [];
+    // Filter to only show calendars where user can add events (owner or writer)
+    const writableCalendars = (data.items || []).filter(calendar => {
+      const accessRole = calendar.accessRole;
+      return accessRole === 'owner' || accessRole === 'writer';
+    });
+
+    console.log(
+      `Filtered to ${writableCalendars.length} writable calendars (from ${
+        data.items?.length || 0
+      } total)`
+    );
+
+    return writableCalendars;
   } catch (error) {
     console.log('Error getting calendar list:', error.message);
     throw error;
