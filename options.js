@@ -5,6 +5,8 @@ console.log('=== OPTIONS PAGE LOADED ===');
 // Get DOM elements
 const defaultCalendarSelect = document.getElementById('defaultCalendar');
 const segmentButtons = document.querySelectorAll('.segment-btn');
+const kofiBtn = document.getElementById('kofiBtn');
+const buyMeACoffeeBtn = document.getElementById('buyMeACoffeeBtn');
 
 // Default settings
 const DEFAULT_SETTINGS = {
@@ -23,6 +25,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   segmentButtons.forEach(btn => {
     btn.addEventListener('click', handleThemeChange);
   });
+
+  // Set up donation buttons with tracking URLs
+  if (kofiBtn) {
+    setupDonationButton(kofiBtn, 'mehrdadh');
+  }
+  if (buyMeACoffeeBtn) {
+    setupDonationButton(buyMeACoffeeBtn, 'mehrdadh');
+  }
 });
 
 // Close options page with Escape key
@@ -86,4 +96,32 @@ async function saveSetting() {
   } catch (error) {
     console.error('Error saving settings:', error);
   }
+}
+
+// Set up donation button with UTM parameters
+function setupDonationButton(button, username) {
+  const platform = button.dataset.platform;
+  const source = button.dataset.source;
+
+  // Build base URLs
+  const baseUrls = {
+    kofi: `https://ko-fi.com/${username}`,
+    buymeacoffee: `https://buymeacoffee.com/${username}`,
+  };
+
+  const baseUrl = baseUrls[platform];
+  if (!baseUrl) {
+    console.error('Unknown platform:', platform);
+    return;
+  }
+
+  // Add UTM parameters
+  const utmParams = new URLSearchParams({
+    utm_source: 'icalendar',
+    utm_medium: source,
+    utm_content: 'button',
+  });
+
+  // Set the href with UTM parameters
+  button.href = `${baseUrl}?${utmParams.toString()}`;
 }
