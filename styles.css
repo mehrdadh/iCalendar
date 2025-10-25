@@ -1125,7 +1125,6 @@ body.options-page {
   gap: 0;
   align-items: stretch;
   flex-wrap: nowrap;
-  width: fit-content;
 }
 
 a.donate-btn {
@@ -1135,7 +1134,7 @@ a.donate-btn {
   justify-content: center;
   gap: 6px;
   padding: 9px 14px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   text-decoration: none;
   color: white;

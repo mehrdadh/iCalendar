@@ -25,6 +25,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
+// Close options page with Escape key
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    window.close();
+  }
+});
+
 // Load settings from storage
 async function loadSettings() {
   try {
