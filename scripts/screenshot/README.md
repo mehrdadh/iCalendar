@@ -11,7 +11,7 @@ You need to run a local web server because the tool uses `fetch()` to load files
 From the project root directory:
 
 ```bash
-cd /Users/mhessar/work/chrome_extension
+cd iCalendar
 python3 -m http.server 8000
 ```
 
