@@ -11,7 +11,7 @@ const buyMeACoffeeBtn = document.getElementById('buyMeACoffeeBtn');
 // Default settings
 const DEFAULT_SETTINGS = {
   defaultCalendar: '', // Empty string means "Use last selected"
-  themeMode: 'light', // 'light', 'dark', or 'system'
+  themeMode: 'system', // 'light', 'dark', or 'system' (defaults to system with light fallback)
 };
 
 // Load settings when page opens
@@ -51,8 +51,8 @@ async function loadSettings() {
     // Apply settings to UI
     defaultCalendarSelect.value = settings.defaultCalendar || '';
 
-    // Set active theme button
-    const activeTheme = settings.themeMode || 'light';
+    // Set active theme button (default to 'system' if not set)
+    const activeTheme = settings.themeMode || 'system';
     updateSegmentedControl(activeTheme);
   } catch (error) {
     console.error('Error loading settings:', error);

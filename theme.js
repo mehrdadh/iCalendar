@@ -3,8 +3,8 @@
 
 console.log('=== THEME MANAGER LOADED ===');
 
-// Default theme mode
-const DEFAULT_THEME = 'light';
+// Default theme mode - uses system preference with light mode fallback
+const DEFAULT_THEME = 'system';
 
 // Initialize theme when page loads
 (async function initializeTheme() {
@@ -17,15 +17,21 @@ const DEFAULT_THEME = 'light';
     applyTheme(themeMode);
 
     // Listen for system theme changes (when in 'system' mode)
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addEventListener('change', async e => {
-      const { themeMode } = await chrome.storage.sync.get({ themeMode: DEFAULT_THEME });
-      if (themeMode === 'system') {
-        const systemTheme = e.matches ? 'dark' : 'light';
-        console.log('System theme changed to:', systemTheme);
-        setThemeAttribute(systemTheme);
+    try {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      if (mediaQuery && mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', async e => {
+          const { themeMode } = await chrome.storage.sync.get({ themeMode: DEFAULT_THEME });
+          if (themeMode === 'system') {
+            const systemTheme = e.matches ? 'dark' : 'light';
+            console.log('System theme changed to:', systemTheme);
+            setThemeAttribute(systemTheme);
+          }
+        });
       }
-    });
+    } catch (error) {
+      console.warn('Could not set up system theme change listener:', error);
+    }
 
     // Listen for theme changes from storage (e.g., changed in options page)
     chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -50,10 +56,24 @@ function applyTheme(mode) {
   let actualTheme = mode;
 
   if (mode === 'system') {
-    // Detect system preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    actualTheme = prefersDark ? 'dark' : 'light';
-    console.log('System preference detected:', actualTheme);
+    try {
+      // Detect system preference
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+      // Check if matchMedia is supported and working
+      if (mediaQuery && typeof mediaQuery.matches === 'boolean') {
+        actualTheme = mediaQuery.matches ? 'dark' : 'light';
+        console.log('System preference detected:', actualTheme);
+      } else {
+        // Fallback to light if system detection is not supported
+        console.warn('System theme detection not supported, falling back to light mode');
+        actualTheme = 'light';
+      }
+    } catch (error) {
+      // Fallback to light mode if system detection fails
+      console.error('Error detecting system theme, falling back to light mode:', error);
+      actualTheme = 'light';
+    }
   }
 
   setThemeAttribute(actualTheme);
