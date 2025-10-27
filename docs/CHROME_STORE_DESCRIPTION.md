@@ -1,5 +1,3 @@
-Instantly add .ics and .vcs calendar files to Google Calendar with drag-and-drop simplicity.
-
 ✨ Features
 
 - Drag & drop .ics/.vcs files
