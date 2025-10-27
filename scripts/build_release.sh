@@ -26,46 +26,36 @@ ZIP_PATH="${OUTPUT_DIR}/${ZIP_NAME}"
 # Create releases directory if it doesn't exist
 mkdir -p "${OUTPUT_DIR}"
 
-# Define files and directories to include
-FILES_TO_INCLUDE=(
-    "src/manifest.json"
-    "src/popup.html"
-    "src/popup.js"
-    "src/background.js"
-    "src/parser.js"
-    "src/styles.css"
-    "src/images/logo_32x32.png"
-    "src/images/logo_64x64.png"
-    "src/images/logo_128x128.png"
-    "src/images/logo_256x256.png"
-    "src/images/logo_512x512.png"
+# Define directories to include
+DIRS_TO_INCLUDE=(
+    "src"
 )
 
-# Define documentation files (optional - can be excluded for store submission)
-DOC_FILES=(
-)
-
-echo -e "${YELLOW}Files to be included:${NC}"
-for file in "${FILES_TO_INCLUDE[@]}" "${DOC_FILES[@]}"; do
-    if [ -e "$file" ]; then
-        echo "  ✓ $file"
+echo -e "${YELLOW}Directories to be included:${NC}"
+for dir in "${DIRS_TO_INCLUDE[@]}"; do
+    if [ -d "$dir" ]; then
+        echo "  ✓ $dir/"
+        # Show key files in the directory
+        if [ -f "$dir/manifest.json" ]; then
+            VERSION_CHECK=$(grep -o '"version": "[^"]*' "$dir/manifest.json" | grep -o '[^"]*$')
+            echo "    - manifest.json (v${VERSION_CHECK})"
+        fi
+        FILE_COUNT=$(find "$dir" -type f | wc -l | tr -d ' ')
+        echo "    - ${FILE_COUNT} total files"
     else
-        echo -e "  ${RED}✗ $file (missing)${NC}"
+        echo -e "  ${RED}✗ $dir/ (missing)${NC}"
     fi
 done
 echo ""
 
-# Check if all required files exist
-MISSING_FILES=0
-for file in "${FILES_TO_INCLUDE[@]}"; do
-    if [ ! -e "$file" ]; then
-        echo -e "${RED}ERROR: Required file missing: $file${NC}"
-        MISSING_FILES=$((MISSING_FILES + 1))
-    fi
-done
+# Check if src directory exists and has manifest.json
+if [ ! -d "src" ]; then
+    echo -e "${RED}ERROR: src/ directory not found${NC}"
+    exit 1
+fi
 
-if [ $MISSING_FILES -gt 0 ]; then
-    echo -e "${RED}Build failed: $MISSING_FILES required file(s) missing${NC}"
+if [ ! -f "src/manifest.json" ]; then
+    echo -e "${RED}ERROR: src/manifest.json not found${NC}"
     exit 1
 fi
 
@@ -76,7 +66,9 @@ fi
 
 # Create the zip file
 echo -e "${YELLOW}Creating release package...${NC}"
-zip -r "$ZIP_PATH" "${FILES_TO_INCLUDE[@]}" "${DOC_FILES[@]}" -x "*.DS_Store" -x "__MACOSX/*" > /dev/null 2>&1
+cd src
+zip -r "../${ZIP_PATH}" . -x "*.DS_Store" -x "__MACOSX/*" > /dev/null 2>&1
+cd ..
 
 # Check if zip was created successfully
 if [ $? -eq 0 ] && [ -f "$ZIP_PATH" ]; then
