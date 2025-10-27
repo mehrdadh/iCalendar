@@ -40,7 +40,7 @@ jobs:
         id: version
         if: success()
         run: |
-          VERSION=$(grep -o '"version": "[^"]*' manifest.json | grep -o '[^"]*$')
+          VERSION=$(grep -o '"version": "[^"]*' src/manifest.json | grep -o '[^"]*$')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
 
