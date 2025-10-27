@@ -58,7 +58,7 @@ See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructio
 
 #### Step 4: Configure the Extension
 
-1. Open `popup.js` in your code editor
+1. Open `src/popup.js` in your code editor
 2. Find line ~16: `const GOOGLE_CLIENT_ID = '...'`
 3. Replace with your Client ID
 4. Save the file
@@ -79,27 +79,33 @@ See [USER_SETUP_GUIDE.md](./scripts/USER_SETUP_GUIDE.md) for detailed instructio
 
 ```text
 chrome_extension/
-├── manifest.json                      # Extension configuration with OAuth2 scopes
-├── popup.html                         # Extension popup UI
-├── popup.js                           # ICS parsing, UI logic, and event creation
-├── background.js                      # OAuth authentication and Google Calendar API calls
-├── styles.css                         # Modern purple gradient theme styling
-├── README.md                          # This file
-├── CONTRIBUTING.md                    # Contribution guidelines
-├── LICENSE                            # License information
+├── src/                               # Extension source code
+│   ├── manifest.json                  # Extension configuration with OAuth2 scopes
+│   ├── popup.html                     # Extension popup UI
+│   ├── popup.js                       # ICS parsing, UI logic, and event creation
+│   ├── background.js                  # OAuth authentication and Google Calendar API calls
+│   ├── parser.js                      # Calendar file parsing logic
+│   ├── theme.js                       # Theme management
+│   ├── options.html                   # Settings/options page
+│   ├── options.js                     # Options page logic
+│   ├── styles.css                     # Modern purple gradient theme styling
+│   └── images/                        # Extension icons and images
 │
-├── docs/
-│   └── privacy-policy.html            # Privacy policy (HTML for web hosting)
-│
-├── scripts/
+├── scripts/                           # Development and build scripts
 │   ├── USER_SETUP_GUIDE.md            # Step-by-step OAuth setup guide
 │   ├── TOKEN_CACHING_INFO.md          # Token caching behavior documentation
 │   ├── SETUP.md                       # Additional setup information
 │   ├── TROUBLESHOOTING.md             # Troubleshooting guide
 │   ├── build_release.sh               # Build script for releases
 │   └── test_storage.html              # Storage testing utility
-|
-└── releases/                          # Packaged extension releases
+│
+├── tests/                             # Test suite
+│   ├── test_parser.js                 # Parser tests
+│   └── data/                          # Test data files
+│
+├── README.md                          # This file
+├── CONTRIBUTING.md                    # Contribution guidelines
+└── LICENSE                            # License information
 ```
 
 ## How It Works
@@ -124,7 +130,7 @@ chrome_extension/
 
 ### Feature Flags
 
-Event caching can be toggled in `popup.js`:
+Event caching can be toggled in `src/popup.js`:
 
 ```javascript
 const ENABLE_EVENT_CACHING = false; // Set to true to persist events across sessions
@@ -161,7 +167,7 @@ The extension extracts and creates events with the following information from yo
 ### "Failed to create event" error
 
 - Check that you've completed the Google Calendar API setup
-- Verify your Client ID is correct in `popup.js` (line ~16)
+- Verify your Client ID is correct in `src/popup.js` (line ~16)
 - Make sure you're added as a test user in Google Cloud Console
 - Ensure Calendar API is enabled in your Google Cloud project
 - Try reloading the extension
@@ -180,7 +186,7 @@ The extension extracts and creates events with the following information from yo
 ### Event not persisting after closing popup
 
 - This is expected behavior with `ENABLE_EVENT_CACHING = false`
-- Set flag to `true` in `popup.js` to enable persistence
+- Set flag to `true` in `src/popup.js` to enable persistence
 
 ## Privacy & Security
 

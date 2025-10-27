@@ -16,7 +16,7 @@ const {
   convertICSToGoogleCalendarEvent,
   parseICSDateTime,
   getFirstValue,
-} = require('../parser.js');
+} = require('../src/parser.js');
 
 // ===== TEST FRAMEWORK =====
 

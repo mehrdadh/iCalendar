@@ -78,7 +78,7 @@ repos:
     hooks:
       - id: validate-manifest
         name: Validate Chrome Extension Manifest
-        entry: python3 -c "import json, sys; json.load(open('manifest.json'))"
+        entry: python3 -c "import json, sys; json.load(open('src/manifest.json'))"
         language: system
         files: 'manifest\.json$'
         pass_filenames: false

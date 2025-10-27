@@ -14,7 +14,7 @@ echo -e "${GREEN}Chrome Extension Release Builder${NC}"
 echo -e "${GREEN}========================================${NC}\n"
 
 # Get version from manifest.json
-VERSION=$(grep -o '"version": "[^"]*' manifest.json | grep -o '[^"]*$')
+VERSION=$(grep -o '"version": "[^"]*' src/manifest.json | grep -o '[^"]*$')
 echo -e "${YELLOW}Building version: ${VERSION}${NC}\n"
 
 # Define output directory and filename
@@ -28,17 +28,17 @@ mkdir -p "${OUTPUT_DIR}"
 
 # Define files and directories to include
 FILES_TO_INCLUDE=(
-    "manifest.json"
-    "popup.html"
-    "popup.js"
-    "background.js"
-    "parser.js"
-    "styles.css"
-    "images/logo_32x32.png"
-    "images/logo_64x64.png"
-    "images/logo_128x128.png"
-    "images/logo_256x256.png"
-    "images/logo_512x512.png"
+    "src/manifest.json"
+    "src/popup.html"
+    "src/popup.js"
+    "src/background.js"
+    "src/parser.js"
+    "src/styles.css"
+    "src/images/logo_32x32.png"
+    "src/images/logo_64x64.png"
+    "src/images/logo_128x128.png"
+    "src/images/logo_256x256.png"
+    "src/images/logo_512x512.png"
 )
 
 # Define documentation files (optional - can be excluded for store submission)
