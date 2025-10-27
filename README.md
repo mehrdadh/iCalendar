@@ -41,7 +41,7 @@ No hard-coded credentials required! Each user brings their own OAuth credentials
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable **"Developer mode"** (toggle in top right)
 3. Click **"Load unpacked"**
-4. Select the extension directory
+4. Select the **`src/`** directory (not the root directory)
 5. Copy the **Extension ID** (you'll need it for OAuth setup)
 
 #### Step 3: Set Up Your Google OAuth (5 minutes)

@@ -35,7 +35,7 @@ Thank you for your interest in contributing! This document provides guidelines f
    - Go to `chrome://extensions/`
    - Enable "Developer mode"
    - Click "Load unpacked"
-   - Select the extension directory
+   - Select the **`src/`** directory
 
 ## Code Style
 

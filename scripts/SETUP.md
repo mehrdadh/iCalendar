@@ -38,7 +38,7 @@ To use the Google Calendar integration feature, you need to set up OAuth credent
 3. Select "Chrome Extension" as the application type
 4. Enter a name (e.g., "ICS File Reader Extension")
 5. For the "Application ID", you'll need your Chrome Extension ID:
-   - Load your unpacked extension in Chrome
+   - Load your unpacked extension in Chrome (load the `src/` directory)
    - Go to `chrome://extensions/`
    - Find your extension and copy the ID (it looks like: `abcdefghijklmnopqrstuvwxyz123456`)
 6. Paste the Extension ID in the "Application ID" field
@@ -47,7 +47,7 @@ To use the Google Calendar integration feature, you need to set up OAuth credent
 
 ## Step 5: Update manifest.json
 
-1. Open `manifest.json` in your extension folder
+1. Open `src/manifest.json` in your extension folder
 2. Find the line with `"client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com"`
 3. Replace `YOUR_CLIENT_ID.apps.googleusercontent.com` with your actual Client ID from Step 4
 4. Save the file

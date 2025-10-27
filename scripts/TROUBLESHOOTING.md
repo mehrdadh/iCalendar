@@ -50,7 +50,7 @@ use cached tokens, ensuring you always explicitly grant permission.
 
 1. Follow the complete setup in [SETUP.md](SETUP.md)
 2. Get your Client ID from Google Cloud Console
-3. Open `manifest.json`
+3. Open `src/manifest.json`
 4. Replace `YOUR_CLIENT_ID.apps.googleusercontent.com` with your actual Client ID
 5. Save and reload the extension
 
@@ -67,8 +67,8 @@ use cached tokens, ensuring you always explicitly grant permission.
 
 **Solution:**
 
-- Make sure `background.js` exists in your extension folder
-- Check that `manifest.json` has the correct reference to it
+- Make sure `src/background.js` exists in your extension folder
+- Check that `src/manifest.json` has the correct reference to it
 - Reload the extension
 
 ### Issue 4: Authentication popup doesn't appear
@@ -134,7 +134,7 @@ Response from background: {success: true, result: {...}}
 
 ### Step 3: Verify manifest.json configuration
 
-Open `manifest.json` and verify:
+Open `src/manifest.json` and verify:
 
 ```json
 {
@@ -153,7 +153,7 @@ Open `manifest.json` and verify:
 Make sure:
 
 - ✅ `client_id` is NOT "YOUR_CLIENT_ID" (must be your actual ID)
-- ✅ All files exist in your extension folder
+- ✅ All files exist in your `src/` folder
 - ✅ No syntax errors in the JSON
 
 ### Step 4: Test with a simple ICS file

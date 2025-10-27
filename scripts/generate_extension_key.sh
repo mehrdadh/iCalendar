@@ -95,12 +95,12 @@ echo -e "${CYAN}OAuth Redirect URI (for Google Cloud Console):${NC}"
 echo -e "${YELLOW}https://${EXTENSION_ID}.chromiumapp.org/${NC}\n"
 
 # Check if manifest.json has the key
-if [ -f "manifest.json" ]; then
-    if grep -q '"key":' manifest.json; then
-        echo -e "${GREEN}✓ manifest.json already has a 'key' field${NC}"
+if [ -f "src/manifest.json" ]; then
+    if grep -q '"key":' src/manifest.json; then
+        echo -e "${GREEN}✓ src/manifest.json already has a 'key' field${NC}"
     else
-        echo -e "${YELLOW}⚠️  manifest.json does NOT have a 'key' field${NC}"
-        echo -e "${YELLOW}You need to add the public key to manifest.json:${NC}\n"
+        echo -e "${YELLOW}⚠️  src/manifest.json does NOT have a 'key' field${NC}"
+        echo -e "${YELLOW}You need to add the public key to src/manifest.json:${NC}\n"
         echo -e '  "key": "'${PUBLIC_KEY}'",'
         echo ""
     fi
@@ -120,10 +120,10 @@ echo -e "\n${GREEN}========================================${NC}"
 echo -e "${GREEN}NEXT STEPS${NC}"
 echo -e "${GREEN}========================================${NC}\n"
 
-echo "1. Add the public key to manifest.json (if not already added)"
+echo "1. Add the public key to src/manifest.json (if not already added)"
 echo "2. Add the OAuth redirect URI to Google Cloud Console:"
 echo -e "   ${YELLOW}https://${EXTENSION_ID}.chromiumapp.org/${NC}"
-echo "3. Reload your extension in Chrome"
+echo "3. Reload your extension in Chrome (load the src/ directory)"
 echo "4. Keep ${KEY_FILE} backed up securely (never commit to git!)"
 echo ""
 

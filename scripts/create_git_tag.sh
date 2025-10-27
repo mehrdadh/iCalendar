@@ -10,7 +10,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 
 # Path to manifest.json
-MANIFEST_FILE="$PROJECT_ROOT/manifest.json"
+MANIFEST_FILE="$PROJECT_ROOT/src/manifest.json"
 
 # Check if manifest.json exists
 if [ ! -f "$MANIFEST_FILE" ]; then
