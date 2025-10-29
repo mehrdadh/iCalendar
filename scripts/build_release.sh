@@ -73,10 +73,15 @@ cd ..
 # Check if zip was created successfully
 if [ $? -eq 0 ] && [ -f "$ZIP_PATH" ]; then
     FILE_SIZE=$(ls -lh "$ZIP_PATH" | awk '{print $5}')
+    FILE_SIZE_BYTES=$(stat -f%z "$ZIP_PATH" 2>/dev/null || stat -c%s "$ZIP_PATH" 2>/dev/null)
+    UNCOMPRESSED_SIZE=$(unzip -l "$ZIP_PATH" | tail -1 | awk '{print $1}')
+    UNCOMPRESSED_SIZE_HR=$(numfmt --to=iec-i --suffix=B $UNCOMPRESSED_SIZE 2>/dev/null || echo "N/A")
+
     echo -e "${GREEN}✓ Release package created successfully!${NC}\n"
     echo -e "${GREEN}========================================${NC}"
     echo -e "  Output: ${ZIP_PATH}"
-    echo -e "  Size: ${FILE_SIZE}"
+    echo -e "  Compressed Size: ${FILE_SIZE} (${FILE_SIZE_BYTES} bytes)"
+    echo -e "  Uncompressed Size: ${UNCOMPRESSED_SIZE_HR}"
     echo -e "${GREEN}========================================${NC}\n"
 
     # List contents of the zip
