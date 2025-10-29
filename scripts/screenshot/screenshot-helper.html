@@ -654,7 +654,7 @@
               fetch('../../src/parser.js'),
               fetch('../../src/popup.js'),
               fetch('../../src/styles.css'),
-              fetch('../../images/logo_512x512.png'),
+              fetch('../../src/images/logo_256x256.png'),
             ]);
 
           console.log('Files fetched successfully');
@@ -757,11 +757,11 @@
             popupScript.after(helperScript);
           }
 
-          // Replace image src with data URL
-          const logoImg = doc.querySelector('img[src="images/logo_512x512.png"]');
-          if (logoImg) {
-            logoImg.src = logoDataUrl;
-          }
+          // Replace image src with data URL (popup.html has multiple logo images)
+          const logoImgs = doc.querySelectorAll('img[src="images/logo_256x256.png"]');
+          logoImgs.forEach(img => {
+            img.src = logoDataUrl;
+          });
 
           // Serialize the document
           const modifiedHtml = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
