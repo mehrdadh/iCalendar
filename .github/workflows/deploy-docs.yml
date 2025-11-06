@@ -33,10 +33,23 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+          working-directory: ./docs
+
+      - name: Install dependencies
+        run: cd docs && bundle install
+
+      - name: Build Jekyll site
+        run: cd docs && bundle exec jekyll build
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'docs'
+          path: 'docs/_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
