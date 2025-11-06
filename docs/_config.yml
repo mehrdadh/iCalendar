@@ -1,0 +1,17 @@
+# Jekyll configuration for GitHub Pages
+
+# Site settings
+title: iCalendar Chrome Extension
+description: Import ICS and VCS calendar files to Google Calendar
+url: https://icalendar.dev
+baseurl: ""
+
+# Build settings
+markdown: kramdown
+exclude:
+  - README.md
+  - CNAME
+
+# Include settings (explicitly include the _includes directory)
+include:
+  - _includes
