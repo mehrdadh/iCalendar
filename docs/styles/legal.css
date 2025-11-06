@@ -27,7 +27,7 @@ header {
   object-fit: contain;
 }
 
-header h1 {
+header .site-title {
   font-size: 3rem;
   margin-bottom: 20px;
   font-weight: 700;
