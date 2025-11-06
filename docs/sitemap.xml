@@ -7,7 +7,7 @@
   <!-- Main landing page -->
   <url>
     <loc>https://icalendar.dev</loc>
-    <lastmod>2025-10-26</lastmod>
+    <lastmod>2025-11-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -15,7 +15,7 @@
   <!-- Privacy Policy -->
   <url>
     <loc>https://icalendar.dev/privacy-policy/</loc>
-    <lastmod>2025-10-26</lastmod>
+    <lastmod>2025-11-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -23,7 +23,7 @@
   <!-- Terms of Service -->
   <url>
     <loc>https://icalendar.dev/terms-of-service/</loc>
-    <lastmod>2025-10-26</lastmod>
+    <lastmod>2025-11-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

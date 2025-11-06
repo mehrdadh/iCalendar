@@ -3,7 +3,14 @@
 A Chrome extension that reads .ics and .vcs calendar files and creates Google Calendar events from them with a
 beautiful, modern interface.
 
-**[📦 Install from Chrome Web Store](https://chromewebstore.google.com/detail/icalendar/dbbbojhlacnjcejnlfhbignjignbpgfd)**
+**🌐 [Visit Official Website](https://icalendar.dev) | 📦 [Install from Chrome Web Store](https://chromewebstore.google.com/detail/icalendar/dbbbojhlacnjcejnlfhbignjignbpgfd)**
+
+---
+
+## 🚀 Quick Start
+
+Import ICS and VCS calendar files to Google Calendar with drag and drop.
+It's that simple! Visit [icalendar.dev](https://icalendar.dev) to learn more and get started.
 
 ## Features
 
@@ -203,6 +210,12 @@ The extension extracts and creates events with the following information from yo
 ## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Resources
+
+- 🌐 **Official Website**: [icalendar.dev](https://icalendar.dev)
+- 📦 **Chrome Web Store**: [Install Extension](https://chromewebstore.google.com/detail/icalendar/dbbbojhlacnjcejnlfhbignjignbpgfd)
+- 🐛 **Issues**: Report bugs on [GitHub Issues](https://github.com/mhessar/iCalendar/issues)
 
 ## License
 
