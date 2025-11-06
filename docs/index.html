@@ -1,3 +1,7 @@
+---
+# Jekyll front matter enables processing
+---
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -95,7 +99,7 @@
   </head>
   <body>
     <div class="container">
-      <div id="header-placeholder"></div>
+      {% include header.html %}
 
       <div class="content">
         <section class="intro" style="text-align: center; margin-bottom: 50px">
@@ -293,12 +297,10 @@
         </div>
       </div>
 
-      <div id="footer-placeholder"></div>
+      {% include footer.html %}
     </div>
 
-    <!-- Deferred scripts for better performance -->
-    <script defer src="scripts/header.js"></script>
-    <script defer src="scripts/footer.js"></script>
+    <!-- Analytics script (deferred for performance) -->
     <script defer src="scripts/analytics.js"></script>
   </body>
 </html>
