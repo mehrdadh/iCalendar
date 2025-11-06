@@ -61,7 +61,7 @@ repos:
     hooks:
       - id: markdownlint
         args: ['--fix']
-        exclude: '(node_modules/|\.github/|docs/CHROME_STORE_DESCRIPTION\.md)'
+        exclude: '(node_modules/|\.github/|scripts/CHROME_STORE_DESCRIPTION\.md)'
 
   # Spell checking (optional - you can disable if too strict)
   - repo: https://github.com/codespell-project/codespell

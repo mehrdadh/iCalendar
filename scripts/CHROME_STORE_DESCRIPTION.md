@@ -21,6 +21,6 @@
 - OAuth tokens cached locally for 1 hour
 - No data sent to third-party servers
 - No tracking, analytics, or personal data collection
-- Full privacy policy: https://mehrdadh.com/iCalendar/privacy-policy/
+- Full privacy policy: https://icalendar.dev/privacy-policy/
 
 💬 Support: https://github.com/mehrdadh/iCalendar

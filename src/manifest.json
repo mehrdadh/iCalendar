@@ -3,8 +3,8 @@
   "name": "iCalendar",
   "version": "1.2.2",
   "description": "Import calendar files (.ics, .vcs, etc) to Google Calendar with simple drag and drop.",
-  "homepage_url": "https://mehrdadh.com/iCalendar",
-  "privacy_policy_url": "https://mehrdadh.com/iCalendar/privacy-policy/",
+  "homepage_url": "https://icalendar.dev",
+  "privacy_policy_url": "https://icalendar.dev/privacy-policy/",
   "icons": {
     "16": "images/logo_16x16.png",
     "32": "images/logo_32x32.png",
