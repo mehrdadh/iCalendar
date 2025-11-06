@@ -22,6 +22,10 @@
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://icalendar.dev" />
 
+    <!-- Preload critical resources for better performance -->
+    <link rel="preload" href="styles/common.css" as="style" />
+    <link rel="preload" href="styles/landing.css" as="style" />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://icalendar.dev" />
@@ -88,9 +92,6 @@
 
     <link rel="stylesheet" href="styles/common.css" />
     <link rel="stylesheet" href="styles/landing.css" />
-
-    <!-- Google Analytics -->
-    <script src="scripts/analytics.js"></script>
   </head>
   <body>
     <div class="container">
@@ -294,7 +295,10 @@
 
       <div id="footer-placeholder"></div>
     </div>
-    <script src="scripts/header.js"></script>
-    <script src="scripts/footer.js"></script>
+
+    <!-- Deferred scripts for better performance -->
+    <script defer src="scripts/header.js"></script>
+    <script defer src="scripts/footer.js"></script>
+    <script defer src="scripts/analytics.js"></script>
   </body>
 </html>
