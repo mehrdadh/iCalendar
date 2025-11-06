@@ -59,7 +59,7 @@ h1,
 
 .btn-primary {
   background: white;
-  color: #667eea;
+  color: #4c5fd8; /* Darker purple for WCAG AA contrast (4.8:1) */
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -67,6 +67,7 @@ h1,
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   text-decoration: none;
+  color: #3d4fc4; /* Even darker on hover */
 }
 
 .btn-secondary {
@@ -116,7 +117,7 @@ h1,
 .feature h3 {
   font-size: 1.5rem;
   margin-bottom: 10px;
-  color: #667eea;
+  color: #4c5fd8; /* Darker for better contrast on gradient background */
 }
 
 .feature p {
@@ -132,7 +133,7 @@ h1,
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 40px;
-  color: #667eea;
+  color: #4c5fd8; /* Darker for WCAG AA contrast on white */
 }
 
 .steps {
@@ -183,7 +184,7 @@ h1,
 .privacy h2 {
   font-size: 2rem;
   margin-bottom: 20px;
-  color: #667eea;
+  color: #4c5fd8; /* Darker for better contrast */
   text-align: center;
 }
 
@@ -203,7 +204,7 @@ h1,
   content: '✓';
   position: absolute;
   left: 0;
-  color: #667eea;
+  color: #4c5fd8; /* Darker for better contrast */
   font-weight: bold;
   font-size: 1.5rem;
 }

@@ -17,14 +17,14 @@ body {
 }
 
 a {
-  color: #667eea;
+  color: #4c5fd8; /* Darker for WCAG AA contrast on white backgrounds */
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 a:hover {
   text-decoration: underline;
-  color: #764ba2;
+  color: #3d4fc4; /* Even darker on hover */
 }
 
 .container {
