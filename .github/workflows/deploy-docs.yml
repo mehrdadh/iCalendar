@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'docs/**'
+      - 'src/manifest.json'
       - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
@@ -30,6 +31,10 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
+      - name: Sync version from manifest.json
+        run: |
+          cd scripts && ./sync_version.sh
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
