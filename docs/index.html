@@ -62,36 +62,64 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "iCalendar Chrome Extension",
-        "applicationCategory": "BrowserApplication",
-        "operatingSystem": "Chrome",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        },
-        "description": "Import ICS and VCS calendar files to Google Calendar with drag and drop. Simple, secure Chrome extension for instant calendar event import.",
-        "author": {
-          "@type": "Person",
-          "name": "Mehrdad Hessar"
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "5",
-          "ratingCount": "1"
-        },
-        "url": "https://icalendar.dev",
-        "softwareVersion": "1.1.0",
-        "screenshot": "https://icalendar.dev/images/screenshots/icalendar-screenshot-2025-10-22T15-25-22.png",
-        "browserRequirements": "Requires Chrome browser",
-        "featureList": [
-          "Import ICS files to Google Calendar",
-          "Import VCS files to Google Calendar",
-          "Drag and drop interface",
-          "Multi-calendar support",
-          "OAuth authentication",
-          "Privacy-focused local processing"
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://icalendar.dev/#organization",
+            "name": "iCalendar",
+            "url": "https://icalendar.dev",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://icalendar.dev/images/icalendar_256x256.png",
+              "width": "256",
+              "height": "256"
+            },
+            "sameAs": [
+              "https://chromewebstore.google.com/detail/icalendar/dbbbojhlacnjcejnlfhbignjignbpgfd"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://icalendar.dev/#website",
+            "url": "https://icalendar.dev",
+            "name": "iCalendar - Import ICS Files to Google Calendar",
+            "publisher": {
+              "@id": "https://icalendar.dev/#organization"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://icalendar.dev/#software",
+            "name": "iCalendar Chrome Extension",
+            "applicationCategory": "BrowserApplication",
+            "operatingSystem": "Windows, macOS, Linux, ChromeOS",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "description": "Import ICS and VCS calendar files to Google Calendar with drag and drop. Simple, secure Chrome extension for instant calendar event import.",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "5",
+              "ratingCount": "1"
+            },
+            "url": "https://icalendar.dev",
+            "softwareVersion": "1.1.0",
+            "screenshot": "https://icalendar.dev/images/screenshots/icalendar-screenshot-2025-10-22T15-25-22.png",
+            "browserRequirements": "Requires Chrome browser",
+            "featureList": [
+              "Import ICS files to Google Calendar",
+              "Import VCS files to Google Calendar",
+              "Drag and drop interface",
+              "Multi-calendar support",
+              "OAuth authentication",
+              "Privacy-focused local processing"
+            ],
+            "publisher": {
+              "@id": "https://icalendar.dev/#organization"
+            }
+          }
         ]
       }
     </script>
