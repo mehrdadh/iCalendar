@@ -8,7 +8,9 @@
     window.location.pathname.includes('/privacy-policy/') ||
     window.location.pathname.includes('/terms-of-service/');
   const baseUrl = isSubdirectory ? '../' : './';
-  const logoPath = isSubdirectory ? '../icalendar.png' : 'icalendar.png';
+  const logoPath = isSubdirectory
+    ? '../images/icalendar_512x512.png'
+    : 'images/icalendar_512x512.png';
 
   const headerHTML = `
     <header>
