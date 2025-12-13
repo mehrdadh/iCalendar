@@ -8,9 +8,16 @@ baseurl: ""
 
 # Build settings
 markdown: kramdown
+theme: null
+encoding: utf-8
+
 exclude:
   - README.md
   - CNAME
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - vercel.json
 
 # Include settings (explicitly include the _includes directory)
 include:

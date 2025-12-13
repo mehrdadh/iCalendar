@@ -1,0 +1,10 @@
+{
+  "build": {
+    "env": {
+      "JEKYLL_ENV": "production"
+    }
+  },
+  "buildCommand": "bundle install && bundle exec jekyll build",
+  "outputDirectory": "_site",
+  "framework": null
+}

@@ -3,3 +3,4 @@ source "https://rubygems.org"
 # Use the same Jekyll version as GitHub Pages for compatibility
 gem "github-pages", group: :jekyll_plugins
 gem "webrick", "~> 1.8"
+gem "rubyzip", "~> 2.3.0"  # Pin to avoid v3 API deprecation warnings
