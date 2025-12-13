@@ -24,4 +24,4 @@
 - Full privacy policy: https://icalendar.dev/privacy-policy/
 - Terms of service: https://icalendar.dev/terms-of-service/
 
-💬 Support: https://github.com/mehrdadh/iCalendar
+💬 Support: support@icalendar.dev

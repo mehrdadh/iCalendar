@@ -215,7 +215,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 - 🌐 **Official Website**: [icalendar.dev](https://icalendar.dev)
 - 📦 **Chrome Web Store**: [Install Extension](https://chromewebstore.google.com/detail/icalendar/dbbbojhlacnjcejnlfhbignjignbpgfd)
-- 🐛 **Issues**: Report bugs on [GitHub Issues](https://github.com/mhessar/iCalendar/issues)
+- 📧 **Support**: [support@icalendar.dev](mailto:support@icalendar.dev)
 
 ## License
 

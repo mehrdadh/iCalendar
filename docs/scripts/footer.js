@@ -18,9 +18,7 @@
         <span>•</span>
         <a href="${baseUrl}terms-of-service/">Terms of Service</a>
         <span>•</span>
-        <a href="https://github.com/mehrdadh/iCalendar">GitHub</a>
-        <span>•</span>
-        <a href="https://github.com/mehrdadh/iCalendar/issues">Report Issue</a>
+        <a href="mailto:support@icalendar.dev">Contact</a>
       </nav>
     </footer>
   `;

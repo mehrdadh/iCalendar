@@ -25,9 +25,6 @@
           class="btn btn-primary"
           >📦 Install Extension</a
         >
-        <a href="https://github.com/mehrdadh/iCalendar" class="btn btn-secondary"
-          >⭐ View on GitHub</a
-        >
       </div>
     </header>
   `;
