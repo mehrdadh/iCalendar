@@ -18,7 +18,7 @@
         <span>•</span>
         <a href="${baseUrl}terms-of-service/">Terms of Service</a>
         <span>•</span>
-        <a href="mailto:support@icalendar.dev">Contact</a>
+        <a href="mailto:support@mehrdadh.com">Contact</a>
       </nav>
     </footer>
   `;
