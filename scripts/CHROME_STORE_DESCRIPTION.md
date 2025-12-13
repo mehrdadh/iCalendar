@@ -22,6 +22,5 @@
 - No data sent to third-party servers
 - No tracking, analytics, or personal data collection
 - Full privacy policy: https://icalendar.dev/privacy-policy/
-- Terms of service: https://icalendar.dev/terms-of-service/
 
 💬 Support: support@mehrdadh.com
